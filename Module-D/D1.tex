@@ -1,0 +1,408 @@
+\include{global/preamble}
+
+%\usecolortheme[RGB={200,200,200}]{structure}
+
+\subtitle[Module D]{{\large Module D: Simulations and Application Frameworks}\\*[0.3em]Lecture 1: Simulation Basics}
+\author[Peter Diener]{Dr Peter Diener}
+\date{November 15, 2013}
+\usecolortheme[RGB={160,45,140}]{structure}
+
+\begin{document}
+
+\frame{\titlepage}
+
+\section*{Outline}
+\frame{\tableofcontents}
+
+\section{Goals}
+\frame{\frametitle{}\begin{centering}\LARGE\insertsectionhead\\\end{centering}}
+
+\frame[containsverbatim]{ \frametitle{Goals}
+  \begin{itemize}
+    \item  The module \emph{Simulations and Application Frameworks} will teach:
+    \begin{itemize}
+      \item what a simulation is,
+      \item how a typical simulation code looks like,
+      \item how it is used in practice,
+      \item and what some of the major concerns in such a code are.
+    \end{itemize}
+    \item We will use Cactus as an example of an Application Framework.
+  \end{itemize}
+}
+
+\section{Simulations}
+\frame{\frametitle{}\begin{centering}\LARGE\insertsectionhead\\\end{centering}}
+
+\frame[containsverbatim]{ \frametitle{What is a simulation?}
+  \begin{center}
+    \vspace{-9.0em}
+    \includegraphics[width=6cm]{pics/car-crash}\mbox{\hspace{0.5em}}
+    \raisebox{3.8em}{\includegraphics[width=4cm]{pics/black-holes}} 
+
+    \raisebox{-3em}[0em][0em]{\includegraphics[width=11cm]{pics/simulations1}}
+  \end{center}
+}
+
+\frame[containsverbatim]{ \frametitle{What is a simulation?}
+  \begin{itemize}
+    \item Flame propagation in combustion engine: \emph{understand} behavior
+          that is too fast or too small.
+    \item Hurricane modeling: \emph{predict} behavior.
+    \item Car crash testing: \emph{engineer} better devices.
+    \item Video games: \emph{create} a fantasy world.
+    \item Black hole collisions: \emph{test} the basic laws of nature.
+  \end{itemize}
+}
+
+\frame[containsverbatim]{ \frametitle{What is a simulation?}
+  \begin{center}
+    \includegraphics[height=7cm]{simulation1}
+  \end{center}
+}
+
+\frame[containsverbatim]{ \frametitle{What is a simulation?}
+  \begin{center}
+    \includegraphics[height=7.5cm]{simulation2}
+  \end{center}
+}
+
+\frame[containsverbatim]{ \frametitle{Ingredients of a simulation}
+  \begin{itemize}
+    \item From the laws of nature derive a mathematical model relating the
+          variables describing the system you want to simulate. This often
+          involves approximations.
+    \item Decide on a discretisation scheme to use for your variables and your
+          mathematical equations (more later).
+    \item Write a computer code to solve the discretised equations.
+    \item Setup initial data and run the simulation.
+    \item Analyze and visualize the results.
+  \end{itemize}
+}
+
+\frame[containsverbatim]{ \frametitle{Example: The wave equation}
+Consider a fluid in 1D described at time $t$ and position $x$ by the density
+$\rho$, pressure $p$ and velocity $u$.
+
+From Newton's first law ($m a = F$) we have
+\[
+\rho\frac{\partial u}{\partial t} = -\frac{\partial P}{\partial x}.
+\]
+On the other hand if the velocity $u$ varies with position $x$ the pressure
+will change
+\[
+\frac{\partial P}{\partial t} = -K \frac{\partial u}{\partial x},
+\]
+where $K$ is the incompressibility of the fluid.
+
+Assuming that $K$ and $\rho$ does not vary with position we can combine the
+equations into one equation for the pressure $P$
+\[
+\frac{\partial^2 P}{\partial t^2}=\frac{K}{\rho}\frac{\partial^2 P}{\partial x^2}.
+\]
+}
+
+\frame[containsverbatim]{ \frametitle{The Initial Value Problem}
+  The wave equation is a very simple example of a very large class of
+  computational problems encountered in physics, chemistry and biology: The
+  Initial Value Problem (IVP).
+  \begin{itemize}
+    \item Typically expressed in terms of a set of PDEs (partial differential
+          equations) that tells us how a system is changing given a known state
+          of the system.
+    \item Starting from a set of \emph{Initial Conditions} we can then simulate the
+          behavior of the system by evolving from one state to another in
+          finite timesteps.
+  \end{itemize}
+}
+
+\frame[containsverbatim]{ \frametitle{Discretisation}
+  \begin{itemize}
+    \item It would require an infinite amount of information to describe the
+          complete state of continuum system (air, water, car body, etc.\ ).
+    \item Instead we select a finite set of discrete points where we assign
+          values to the field variables in order to reduce the number of
+          degrees of freedom.
+    \item There a many different ways to do this
+      \begin{itemize}
+        \item Finite differences (sample solution on a regular grid)
+        \item Finite elements (small rigid triangles or tetrahedra)
+        \item Finite volumes (small squares or cubes)
+        \item Expansion of fields in a finite number of basis functions.
+        \item Particles
+      \end{itemize}
+  \end{itemize}
+}
+
+\frame[containsverbatim]{ \frametitle{Discretisation}
+  \begin{itemize}
+    \item Using a finite (instead of infinite) number of degrees of freedom 
+          introduces an approximation error.
+    \item The accuracy of the approximation depends on the discretisation
+          scheme and the resolution (how closely is the continuum sampled).
+    \item For any discretisation scheme we can establish the order of
+          accuracy. E.g. fourth order: $\epsilon(h) = O(h^4)$.
+    \item Validation of simulation results requires careful convergence
+          studies.
+    \item The order of accuracy only gives a reliable measure of the error
+          when the resolution is high enough (the convergent regime).
+  \end{itemize}
+}
+
+\frame[containsverbatim]{ \frametitle{Discretisation example: The wave equation}
+  Approximating the pressure $P(x,t)$ with a grid function $P_i^{(n)}$.
+  \begin{minipage}[b]{3.05cm}
+    \includegraphics[width=3cm]{pics/discretisation}
+  \end{minipage}
+  \raisebox{8em}{
+  \begin{minipage}[t]{8.5cm}
+    \begin{eqnarray}
+      \frac{\partial^2 P}{\partial t^2} & = & 
+       v^2\frac{\partial^2 P}{\partial x^2} \nonumber \\
+      & \Downarrow & \nonumber \\
+      \frac{P_i^{(n+1)}-2 P_i^{(n)}+P_i^{(n-1)}}{\Delta t^2} & = &
+      v^2\frac{P_{i+1}^{(n)}-2 P_i^{(n)}+P_{i-1}^{(n)}}{\Delta x^2} \nonumber
+    \end{eqnarray}
+  \end{minipage}}
+  The error from this time and space discretisation is $O(\Delta x^2)$.
+
+}
+\frame[containsverbatim]{ \frametitle{Caveat}
+  \begin{itemize}
+    \item Some systems are not described by PDEs but other types of
+          mathematical relations.
+    \item Sometimes it is the end state of a system that is interesting (like
+          an equilibrium configuration) and not how it got there.
+    \item \begin{minipage}[t]{6cm}
+            If the initial data is an approximation or a guess, the result of
+            a simulation may not be reliable.
+          \end{minipage}
+          \raisebox{-4em}{
+            \begin{minipage}[t]{4.5cm}
+              \includegraphics[width=4cm]{pics/garbage}
+            \end{minipage}
+          }
+  \end{itemize}
+}
+
+\frame[containsverbatim]{ \frametitle{Simulation Overview}
+  \begin{itemize}
+    \item Derive a mathematical model for the system you want to simulate.
+    \item Discretise the resulting PDEs (or whatever other form they are in).
+    \item Decide on the shape and size of the computational domain (normally
+          it's impossible to simulate the whole universe).
+    \item Decide on the resolution.
+    \item Decide on how to handle the boundaries of the computational domain.
+    \item Set up initial conditions.
+    \item Evolve using many small timesteps.
+    \item Output data along the way.
+    \item Analyse and visualize the data.
+    \item Write the paper.
+  \end{itemize}
+}
+
+\frame[containsverbatim]{ \frametitle{Structure of a Simulation Code}
+  \begin{itemize}
+    \item Variables (solution) stored in large ``state vectors''
+      \begin{itemize}
+        \item There can be many (e.g. billions) elements in the state vector
+        \item Best handled in efficient container structure like a Fortran 
+              array, C or C++ vector or a tree structure.
+        \item The code needs constructs to iterate over these elements
+              or subsets of elements.
+      \end{itemize}
+    \item Routines to set up the initial condition.
+    \item Routines to perform many identical time steps.
+    \item I/O methods to write solution to disk and optionally checkpoint the
+          simulation.
+    \item Should be able to run as batch job without user intervention.
+  \end{itemize}
+}
+
+\frame[containsverbatim]{ \frametitle{Initial Data}
+  \begin{itemize}
+    \item Analytical initial data can just be calculated when the
+          simulation starts. 
+    \item Numerical initial data may be solved internally at the beginning or
+          be read in from file.
+    \item Can be set up from reading in a checkpoint file (continuation run).
+    \item Initial data can be large:\\
+          1 billion elements,\\
+          25 variables/element,\\
+          8 Byte/variable: total 200 GByte.
+  \end{itemize}
+}
+
+\frame[containsverbatim]{ \frametitle{Parallel Computing}
+  \begin{itemize}
+    \item Cannot store the solution on a single node; parallel programming
+          using MPI is necessary.
+    \item At the moment only Fortran, C and C++ are viable languages for
+          programming a supercomputer.
+    \item Research is underway in other (maybe simpler) ways like Unified
+          Parallel C, Co-Array Fortran or HPX (here at LSU)
+    \item Simulations take long:\\
+          1 billion elements,\\
+          1000 Flop/element/step,\\
+          1 million steps,\\
+          CPU speed 10 GFlop/s: total 28,000 CPU hours (3.2 CPU years),
+          or 12 days when running on 100 CPUs.
+  \end{itemize}
+}
+
+\frame[containsverbatim]{ \frametitle{Batch Processing}
+  \begin{itemize}
+    \item Since simulations take so long we cannot supervise them manually
+      \begin{itemize}
+        \item Cannot be awake at all times.
+        \item A user error can destroy weeks of data.
+        \item Supercomputers are expensive; cannot waste valuable resources
+              waiting for the next user input.
+      \end{itemize}
+    \item Need to \emph{plan} simulations carefully ahead of time, then let
+          them run automatically.
+  \end{itemize}
+}
+
+\frame[containsverbatim]{ \frametitle{Batch Processing}
+  \begin{itemize}
+    \item Need to \emph{plan} simulations carefully ahead of time, then let
+          them run automatically...
+    \item ...so that each error is only discovered days or weeks later!
+    \item Using a supercomputer thus requires much expertise, experience,
+          patience and a high tolerance for frustration.
+    \item \emph{Using supercomputers are more difficult than it really should
+          be}.
+  \end{itemize}
+}
+
+\section{Supercomputers}
+\frame{\frametitle{}\begin{centering}\LARGE\insertsectionhead\\\end{centering}}
+
+\frame[containsverbatim]{ \frametitle{Fast vs.\ Large}
+  \begin{itemize}
+    \item Supercomputers are not so much fast as they are large.
+    \item They are not interactive (like a notebook or workstation), they
+          operate in batch mode.
+    \item Their hardware is complex.
+  \end{itemize}
+  \includegraphics[width=4.55cm]{pics/fast}\hspace{0.5em}
+  \includegraphics[width=5cm]{pics/large}
+}
+
+\frame[containsverbatim]{ \frametitle{Remote Access}
+  \begin{itemize}
+    \item Supercomputers are located far away, need to use ssh/gsissh to access.
+    \item Log in is to \emph{front end (head node)} only, usually a large
+          workstation.
+    \item Cannot (or should not) use front end to run simulations.
+  \end{itemize}
+  \includegraphics[width=5.55cm]{pics/hpc-map}\hspace{0.5em}
+  \includegraphics[width=4cm]{pics/head-node}
+}
+\frame[containsverbatim]{ \frametitle{File Systems}
+  \begin{itemize}
+    \item Supercomputers need large and fast file systems to store simulation
+          data often many 100 TByte or PByte.
+    \item For management and performance reasons the file systems  are usually
+          split into different parts with different properties.
+      \begin{description}
+        \item[Home directory] GBytes per user, many small files, backed up.
+        \item[Data directory] TBytes per user, few large files, backed up,
+                              tape backend.
+        \item[Scratch directory] No quota, few large files, often automatically
+                                 deleted.
+      \end{description}
+    \item This is done differently on each supercomputer -- read documentation!
+  \end{itemize}
+}
+
+\frame[containsverbatim]{ \frametitle{Compute Nodes and Interconnect}
+  \begin{itemize}
+    \item Most supercomputers have a \emph{cluster} architecture with many
+          interconnected compute nodes.
+    \item Each node may have multiple cores (4 to 64), similar to a
+          large workstation typically with 1GByte to 4GByte of memory per core.
+    \item Nodes may additionally have GPU's or Intel Xeon Phi's.
+    \item Nodes are connected via a low-latency \emph{communication network}
+          (e.g. Infiniband or other proprietary technologies).
+    \item Overall system has from a few up to 10,000 nodes. The largest
+          Supercomputer in the world currently has 3,120,000 cores in 16,000 
+	  nodes (Intel Xeon IvyBridge processors and Xeon Phi).
+    \item My personal scale:
+      \begin{description}
+        \item[small] $<2$k cores
+        \item[medium] $<20$k cores
+        \item[large] $>20$k cores
+      \end{description}
+  \end{itemize}
+}
+
+\frame[containsverbatim]{ \frametitle{Batch System}
+  \begin{itemize}
+    \item Cannot (or should not) use compute nodes directly.
+    \item Need to submit \emph{job} to \emph{batch system}, requesting $N$ 
+          nodes for $T$ amount of time.
+      \begin{itemize}
+        \item ...wait (a few days?)...
+        \item ...then the job start to run (most likely while you're asleep)...
+        \item ...and then you discover your errors...
+      \end{itemize}
+    \item There is always a run time limit (e.g.\ 8, 12, 24, 48, 72 hours)
+      \begin{itemize}
+        \item ...which is inconvenient when you need to run for 2 weeks:
+              checkpoint/restart is necessary.
+      \end{itemize}
+    \item The batch system ensures that jobs get run in an order that
+          keeps the supercomputer as busy as possible at all times.
+  \end{itemize}
+}
+
+\frame[containsverbatim]{ \frametitle{Allocations}
+  \begin{itemize}
+    \item Need to ensure fair use of supercomputers and prevent individual
+          users from monopolising it.
+    \item Need to ensure that supercomputer time are used for important
+          research and by codes that can run efficiently.
+   \item Allocation proposals for the national supercomputers are therefore
+         peer reviewed.
+   \item The allocation review panel then decides how much time each research
+         project will be allowed to use in the coming allocation period.
+   \item 1 CPU hour costs about 5 cents (10 cents on Amazon ECC).
+   \item With this metric, Super Mike II produces about \$352 worth of CPU time
+         every hour. 
+  \end{itemize}
+  \includegraphics[width=2cm]{xsede}\hspace{0.5em}
+  \includegraphics[width=2cm]{loni}\hspace{0.5em}
+  \includegraphics[width=2cm]{nersc}
+}
+
+\frame[containsverbatim]{ \frametitle{Software}
+  \begin{itemize}
+    \item Installed/available software is system dependent, not just standard
+          Unix systems.
+    \item Therefore cannot just install binaries, need to build software for
+          each supercomputer.
+    \item Installed software typically consists of compilers, MPI libraries,
+          Scientific libraries (like GSL, BLAS/LAPACK, PETSC, etc.), perl,
+          python, etc.
+    \item Most interactions with a supercomputer takes place on the command
+          line. Some GUIs, Portals exist, but typically limited in 
+          functionality.
+  \end{itemize}
+}
+
+\frame[containsverbatim]{ \frametitle{Supercomputer Steps}
+  \begin{itemize}
+    \item Obtain an \emph{Allocation}.
+    \item Log in to the \emph{Front End}.
+    \item Compile your code on the \emph{Front End}.
+    \item Submit your jobs on the \emph{Front End} to the \emph{Batch Queue}.
+    \item Simulations then execute on the \emph{Compute Nodes} connected via
+          a \emph{Communication Network}.
+    \item Data stored in \emph{File Systems} can then be analyzed on the
+          supercomputer itself or transferred to other places for analysis.
+    \item Data can be stored permanently in \emph{Tape Archives}.
+  \end{itemize}
+}
+
+\end{document}

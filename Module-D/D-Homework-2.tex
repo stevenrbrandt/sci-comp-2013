@@ -1,0 +1,143 @@
+\include{global/preamble}
+
+%\usecolortheme[RGB={200,200,200}]{structure}
+
+\subtitle[Module D]{{\large Module D: Simulations and Application Frameworks}\\*[0.3em]Homework 2: Write a Cactus thorn}
+\author[Peter Diener]{Dr Peter Diener}
+\date{November 22, 2013}
+\usecolortheme[RGB={45,160,140}]{structure}
+
+\begin{document}
+
+\frame{\titlepage}
+
+\section{Homework}
+\frame{\frametitle{}\begin{centering}\LARGE\insertsectionhead\\\end{centering}}
+
+\frame[containsverbatim]{ \frametitle{Homework}
+  Your homework will be to design and implement a (fairly) simple Cactus
+  thorn.
+  \begin{itemize}
+    \item Physics problem: Find out ``where'' the star from last weeks
+          homework assignment is oscillating, i.e.\ what radius contributes
+	  most to the kinetic energy of the oscillations.
+    \item Method: Calculate the kinetic energy density everywhere in the
+          neutron star and figure out where it is largest.
+    \item The kinetic energy density is:
+          \[
+            e_{\,\mathrm{kin}} = \frac{1}{2} \rho v^2 = \frac{1}{2}\rho\,
+                                                      (v_x^2+v_y^2+v_z^2),
+          \]
+          i.e.\ it is large where the density $\rho$ is high and the velocity
+          $v$ is high.
+  \end{itemize}
+}
+
+\frame[containsverbatim]{ \frametitle{Homework}
+  \begin{itemize}
+    \item To get started use the command: \\
+          \texttt{make newthorn} \\
+          in the Cactus directory. This will ask you for:
+      \begin{description}
+        \item[Thorn name\hfill] Pick one you like.
+        \item[arrangement\hfill] Choose an existing one or create your own with
+                           a name you like.
+        \item[Thorn Author Name] Type your name.
+        \item[Email Address] Type your email address.
+        \item[Add another author? Y/N] Type \texttt{n} or \texttt{N}.
+        \item[License\hfill] Type in your favorite source code license (e.g. GPL).
+      \end{description}
+    \item After this a new template for a thorn will have been created with
+	    \texttt{README}, \texttt{configuration.ccl}, 
+	    \texttt{interface.ccl}, \texttt{param.ccl} and
+          \texttt{schedule.ccl} files and \texttt{doc}, \texttt{par},
+          \texttt{src} and \texttt{test} directories to be filled in.
+  \end{itemize}
+}
+
+\frame[containsverbatim]{ \frametitle{Homework}
+  \begin{itemize}
+    \item The variables \texttt{rho} (grid function) and \texttt{vel} (3-vector
+          gridfunction) are defined in \texttt{EinsteinBase/HydroBase}.
+    \item The kinetic energy density is defined at every gridpoint and needs
+          to be stored in a grid function.
+    \item Write a routine (placed in the \texttt{src} directory) to iterate
+          over all grid points\ldots
+    \item \ldots and then evaluate the formula from the previous slide
+          for each grid point and store the result in the grid function.
+    \item It's up to you if you want to use C, C++ or F90. The grid functions
+          will be accessed differently depending on your choice.
+      \begin{itemize}
+        \item F90: look at\\
+              {\footnotesize
+              \texttt{EinsteinInitialData/GRHydro\_InitData/src/GRHydro\_ShockTube.F90}
+              }
+        \item C or C++: look at\\
+              {\footnotesize
+              \texttt{EinsteinInitialData/TOVSolver/src/tov.c}.
+              }
+      \end{itemize}
+  \end{itemize}
+}
+
+\frame[containsverbatim]{ \frametitle{Homework}
+  \begin{itemize}
+    \item \underline{\texttt{interface.ccl}:}\\
+      \begin{itemize}
+        \item Define the implementation name that the thorn implements.
+        \item Inherit from \texttt{HydroBase} where \texttt{rho} and
+              \texttt{vel} are defined.
+        \item Declare a new grid function for kinetic energy density.
+      \end{itemize}
+    \item \underline{\texttt{schedule.ccl}:}\\
+      \begin{itemize}
+        \item Schedule your routine that performs the calculation in the
+              \texttt{analysis} schedule bin.
+        \item Request storage for the new grid function for this calculation.
+      \end{itemize}
+    \item \underline{\texttt{param.ccl}:}\\
+      \begin{itemize}
+        \item This thorn doesn't need any parameters.
+      \end{itemize}
+    \item \underline{\texttt{configuration.ccl}:}\\
+      \begin{itemize}
+        \item This thorn doesn't use any special capabilities.
+      \end{itemize}
+  \end{itemize}
+}
+
+\frame[containsverbatim]{ \frametitle{Homework}
+  \begin{itemize}
+    \item Add your source filename to \texttt{make.code.defn} so that the
+          make system will compile your code. Look at other thorns to see how.
+    \item Add your new thorn to the thornlist you used to compile the
+          Cactus configuration from last week's homework and recompile.
+	  Go back and fix problems if the compile fails and try again.
+    \item Copy the parameter file from last week's homework to a different name
+          and edit it:
+      \begin{itemize}
+        \item Activate your thorn.
+        \item Request 1D output of your new grid function.
+      \end{itemize}
+    \item Run as you did last week but specify the new parameter file.
+    \item Visualise the 1D output. Note that this run uses AMR so the 1D output
+          contains data from multiple refinement levels. We are here only
+          interested in the output from the finest refinement level (which
+          is refinement level 4 in the output file).
+  \end{itemize}
+}
+
+\frame[containsverbatim]{ \frametitle{Homework}
+  \begin{itemize}
+    \item Your homework will consist of the a tar ball of your thorn and
+          a plot of the kinetic energy density as a function of x. Use
+          a gnuplot command like:\\
+          \texttt{p '<file\_name>' u 10:((\$3==4 \&\& \$9==1000)?\$13:1/0) w lp}\\
+         to extract the relevant data.
+    \item Brownie points to whomever can explain how the gnuplot command above
+          works.
+    \item Homework is due on December 6, 2013.
+  \end{itemize}
+}
+
+\end{document}

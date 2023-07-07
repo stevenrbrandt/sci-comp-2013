@@ -1,0 +1,77 @@
+\documentclass{beamer}
+
+\usepackage[utf8]{inputenc}
+%\usepackage{beamerthemesplit}
+\usepackage{url}
+\usepackage{tikz}
+\usepackage{alltt}
+\usepackage{listings}
+\usepackage{marvosym}
+\usepackage{color}
+\usepackage[multidot]{grffile}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{setspace}
+\usepackage{hyperref}
+\usepackage{verbatim}
+\usepackage{fancyvrb}
+%\hypersetup{colorlinks=true, linkcolor=blue,  anchorcolor=blue,  
+%citecolor=blue, filecolor=blue, menucolor=blue, pagecolor=blue,  
+%urlcolor=blue} 
+\lstset{keywordstyle=\bfseries\color{brown},
+        stringstyle=\ttfamily,
+        commentstyle=\color{blue}\textit,
+        showstringspaces=false}
+
+\useoutertheme{}
+\usetheme{Madrid}
+\graphicspath{{pics/}{global/}
+{pics/I/}{pics/A1/}{pics/A2/}{pics/A3/}{pics/A4/}{pics/A5/}{pics/A6/}{pics/A7/}
+}
+
+\logo{\includegraphics[height=1cm]{ProcessHorizontal}} 
+
+\institute{Center for Computation and Technology\\Louisiana State University, Baton Rouge, LA}
+
+\setbeamertemplate{navigation symbols}{} 
+
+\title{CSC 7700: Scientific Computing}
+
+% We want to use the infolines outer theme because it does not use a lot of
+% space, but it also tries to print an institution and the slide
+% numbers (which we might not want to show). Therefore, we here redefine the
+% footline ourselfes - mostly a copy & paste from
+% /usr/share/texmf/tex/latex/beamer/themes/outer/beamerouterthemeinfolines.sty
+\defbeamertemplate*{footline}{infolines theme without institution and slide numbers}
+{
+  \leavevmode%
+  \hbox{%
+  \begin{beamercolorbox}[wd=.25\paperwidth,ht=2.25ex,dp=1ex,center]{author in head/foot}%
+    \usebeamerfont{author in head/foot}\insertshortauthor
+  \end{beamercolorbox}%
+  \begin{beamercolorbox}[wd=.5\paperwidth,ht=2.25ex,dp=1ex,center]{title in head/foot}%
+    \usebeamerfont{title in head/foot}\insertshorttitle
+  \end{beamercolorbox}%
+  \begin{beamercolorbox}[wd=.25\paperwidth,ht=2.25ex,dp=1ex,center]{date in head/foot}%
+    \usebeamerfont{date in head/foot}\insertshortdate{}
+  \end{beamercolorbox}}%
+  \vskip0pt%
+}
+
+% Some useful commands
+\newcommand{\abspic}[4]
+ {\vspace{ #2\paperheight}\hspace{ #3\paperwidth}\includegraphics[height=#4\paperheight]{#1}\\
+  \vspace{-#2\paperheight}\vspace{-#4\paperheight}\vspace{-0.0038\paperheight}}
+
+\newcommand{\picw}[4]{{
+ \usebackgroundtemplate{
+ \color{black}\vrule width\paperwidth height\paperheight\hspace{-\paperwidth}\hspace{-0.01\paperwidth}
+ \hspace{#4\paperwidth}\includegraphics[width=#3\paperwidth, height=\paperheight]{#1}}\logo{}
+ \frame[plain]{\frametitle{#2}}
+}}
+\newcommand{\pic}[2]{\picw{#1}{#2}{}{0}}
+
+\newcommand{\question}[1]{\frame{\frametitle{#1}
+ \begin{centering}\Huge #1\\\end{centering}
+}}
+

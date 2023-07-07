@@ -1,0 +1,767 @@
+\include{global/preamble}
+\usepackage{wrapfig}
+
+%\usecolortheme[RGB={200,200,200}]{structure}
+
+\subtitle[Module C]{{\large Module C: Advanced Programming Tools}\\*[0.3em]Lectures 3/4: Eclipse IDE}
+\author[Dr. Steven R. Brandt]{Dr. Steven R. Brandt}
+\date{September 28, 2012}
+%\usecolortheme[RGB={160,45,140}]{structure}
+\usecolortheme[RGB={110,65,240}]{structure}
+
+\begin{document}
+
+\frame{\titlepage}
+
+\section*{Outline}
+\frame{\tableofcontents}
+
+\section{Goals}
+\frame{\frametitle{}\begin{centering}\LARGE\insertsectionhead\\\end{centering}}
+
+\frame[containsverbatim]{ \frametitle{Goals}
+  \begin{itemize}
+    \item  The module \emph{Advanced Programming Tools} will teach:
+    \begin{itemize}
+      \item Eclipse
+      \item Installing Eclipse and the JDK
+      \item Views, Editors, Codes
+      \item Tools for Static Analysis
+      \item Tools for Debugging
+      \item Linux Tools for Eclipse
+      \item HPC Toolkit Plugin
+      \item Mojave
+    \end{itemize}
+    \item We will use Cactus as an example of an Application Framework.
+  \end{itemize}
+}
+
+\section{Eclipse}
+\frame{\frametitle{}\begin{centering}\LARGE\insertsectionhead\\\end{centering}}
+
+\frame{ \frametitle{Eclipse}
+    \begin{center}
+    \includegraphics[width=5cm]{pics/eclipselogo}\mbox{\hspace{0.5em}}
+    \end{center}
+    \begin{itemize}
+        \item {IDE: Integrated Development Environment}
+        \item {Advanced editing capabilities}
+        \item {Written in Java for multi-platform support}
+        \item {open-source}
+        \item {extensible}
+        \item {Supports C, C++, Fortran, etc. through ``plugins''}
+    \end{itemize}
+}
+
+\subsection{Installing the Oracle JDK}
+\frame{\frametitle{}\begin{centering}\LARGE\insertsubsectionhead\\\end{centering}}
+
+\frame{ \frametitle{Installing the Oracle JDK}
+    \begin{center}
+    \includegraphics[width=3cm]{pics/getjava}\mbox{\hspace{0.5em}}
+    \end{center}
+\begin{itemize}
+\item {Goto http://java.sun.com}
+\item {Click on ``Java SE'' under ``Top Downloads''}
+\item {Click on the ``Java Download'' button}
+\item {Scroll down and get the Java SE 6 JDK (Java Development Kit)}
+\end{itemize}
+}
+
+\frame[containsverbatim]{ \frametitle{Installing the Oracle JDK}
+After you run the installer, add the following to your .bashrc
+\begin{itemize}
+\item \verb=export JAVA_HOME==\verb=/usr/java/jdk1.6.0_27=
+\item \verb=export PATH==\verb=$JAVA_HOME/bin:$PATH=
+\item Now source your .bashrc
+\end{itemize}
+}
+
+\subsection{Installing Eclipse}
+\frame{\frametitle{}\begin{centering}\LARGE\insertsubsectionhead\\\end{centering}}
+
+\frame[containsverbatim]{ \frametitle{Installing Eclipse}
+\begin{itemize}
+\item Goto \verb=http://www.eclipse.org/downloads/=
+\item Get Eclipse for Parallel Application Developers
+\item Command: {\small\verb=tar xvf ~/Download/eclipse-SDK-4.2-linux-gtk-x86_64.tar.gz=}
+\item Command: \verb=cd eclipse/=
+\item Command: \begin{verbatim}
+./eclipse -Xms1024m -Xmx2048m \
+    -XX:PermSize=256m -XX:MaxPermSize=512m &
+\end{verbatim}
+\item You'll see a prompt for selecting a workspace. Check the box which says ``Use this as the default and do not ask again''
+\end{itemize}
+}
+
+%\frame[containsverbatim]{ \frametitle{Installing Eclipse/PTP}
+%\begin{itemize}
+%\item Help \verb=>= Install new software...
+%\item Where it says "Work with" select ``--All Available Sites--''
+%\item Then click the blue link which says ``Available Software Sites''
+%\item In the popup that appears, type ``ptp'' in the filter for available software sites
+%\item Check the one item that is selected
+%\item Hit OK
+%\item Hit ``Select All''
+%\end{itemize}
+%}
+
+%\frame[containsverbatim]{ \frametitle{Installing Eclipse/PTP}
+%    \begin{center}
+%    \includegraphics[width=9cm]{pics/install1}\mbox{\hspace{0.5em}}
+%    \end{center}
+%}
+
+%\frame[containsverbatim]{ \frametitle{Installing Eclipse/PTP}
+%\begin{itemize}
+%\item Where it says "Work with" select ``http://download.eclipse.org/tools/ptp/update''
+%\item Hit ``Select All''
+%\item Hit ``Next \verb=>=''
+%\item Hit ``Next \verb=>=''
+%\item Accept the license agreement
+%\item Hit ``Finish''
+%\item Hit ``Restart Now''
+%\item In the future, to update Eclipse go to {\tt Help $>$ Update Software}
+%\end{itemize}
+%}
+
+\section{Hello World in C}
+\frame{\frametitle{}\begin{centering}\LARGE\insertsectionhead\\\end{centering}}
+
+\frame[containsverbatim]{ \frametitle{Hello World in C}
+\begin{itemize}
+\item File \verb=>= New \verb=>= C Project (or select ``Project
+ Explorer'' and type Shift-Alt-N))
+\item Select ``Hello World ANSI C Project''
+\item Fill in project name
+\item Click ``Next''
+\end{itemize}
+\begin{center}
+    \includegraphics[width=4cm]{pics/hello}\mbox{\hspace{0.5em}}
+\end{center}
+}
+
+\frame[containsverbatim]{ \frametitle{Hello World in C}
+``Project \verb=>= Build Project'' builds a project
+\begin{center}
+    \includegraphics[width=7cm]{pics/buildhello}\mbox{\hspace{0.5em}}
+\end{center}
+}
+
+\frame[containsverbatim]{ \frametitle{Hello World in C}
+``Run \verb=>= Run'' runs the program
+\begin{center}
+    \includegraphics[width=7cm]{pics/runhello}\mbox{\hspace{0.5em}}
+\end{center}
+}
+
+\subsection{Advanced Editing}
+\frame{\frametitle{}\begin{centering}\LARGE\insertsubsectionhead\\\end{centering}}
+
+\frame[containsverbatim]{ \frametitle{Control Sequences}
+\begin{itemize}
+\item Find source definition (Ctrl-G to show, F3 to go)
+\item Alt-$\leftarrow$ navigates to the previous source window (like
+ a web browser back button)
+\item Shift-Ctrl-G find symbol in workspace
+\item Ctrl-H to search
+\item Alt-Shift-$\leftarrow$ or Alt-Shift-$\rightarrow$ highlights a block
+\end{itemize}
+}
+\frame[containsverbatim]{ \frametitle{Control Sequences}
+\begin{itemize}
+\item Shift-Ctrl-P bounces from the start to the end of a block (or vice versa)
+\item Correct indentation: highlight region, then Ctrl-I
+\item Toggle comment: Ctrl-/
+\item Correct format: highlight region, then Ctrl-Shift-F
+\item But what is the correct style?
+\end{itemize}
+}
+
+\frame[containsverbatim]{ \frametitle{Project Style}
+\begin{itemize}
+\item Select a project
+\item Select: Project $>$ Properties
+\item Open C/C++ General
+\item Select ``Formatter''
+\end{itemize}
+\begin{center}
+    \includegraphics[width=6cm]{pics/estyle}\mbox{\hspace{0.5em}}
+\end{center}
+}
+
+\frame[containsverbatim]{ \frametitle{Refactorings}
+\begin{itemize}
+\item Alt-Shift-R rename variable or function
+\item Alt-Shift-L extract local variable
+\item Alt-Shift-M extract method
+\item Surround with...
+\end{itemize}
+}
+
+%\frame[containsverbatim]{ \frametitle{Code Templates}
+%\begin{center}
+%    \includegraphics[width=6cm]{pics/codet}\mbox{\hspace{0.5em}}
+%\end{center}
+%}
+
+\frame[containsverbatim]{ \frametitle{Perspective / Editor / View}
+\begin{itemize}
+\item A perspective is a collection of views. You can change
+them by going to \verb=Window > Open Perspective...=
+\item On the right you see the outline view.
+\item Click the small x and it will go away.
+\item To bring it back, use \verb=Window > Open View...= (or Shift-Alt-Q)
+\end{itemize}
+}
+
+\frame[containsverbatim]{ \frametitle{History}
+\begin{itemize}
+\item The ``History'' view tracks session edits (Shift-Alt-Q Z)
+\item It can recover old versions from within the session
+\item By default, you won't see edits from a previous session,
+    but if you click the ``Link with Editor and Selection'' you
+    can see them. \includegraphics[width=0.5cm]{pics/linkwith}
+\item Old versions stored in \verb=.metadata/.plugins/org.eclipse.core.resources/.history=
+\end{itemize}
+\begin{center}
+    \includegraphics[width=6cm]{pics/history}\mbox{\hspace{0.5em}}
+\end{center}
+}
+
+%\frame[containsverbatim]{ \frametitle{Preferences}
+%\begin{itemize}
+%\item Eclipse rebuilds all open projects before running.
+%    Very annoying.
+%\item To turn it off, go to \verb=Window > Preferences=
+%\item Open Run/Debug
+%\item Select Launching
+%\item Uncheck ``Build (if required) before launching''
+%\end{itemize}
+%\begin{center}
+%    \includegraphics[width=6cm]{pics/bifl}\mbox{\hspace{0.5em}}
+%\end{center}
+%}
+
+\frame[containsverbatim]{ \frametitle{Automatic Updates}
+\begin{center}
+    \includegraphics[width=6cm]{pics/autou}\mbox{\hspace{0.5em}}
+\end{center}
+}
+
+
+\subsection{Linux Tools}
+\frame{\frametitle{}\begin{centering}\LARGE\insertsubsectionhead\\\end{centering}}
+
+% Linux Tools - http://downloads.eclipse.org/technology/linuxtools/update
+% gcov
+% gprof
+% valgrind
+%\frame[containsverbatim]{ \frametitle{LinuxTools}
+%\begin{itemize}
+%\item Help $>$ Install New Software...
+%\item Press ``Add'' set ``Name:'' to ``Linux Tools'' and Location to ``http://downloads.eclipse.org/technology/linuxtools/update''
+%\item Hit ``Next'' etc.
+%\end{itemize}
+%}
+\frame[containsverbatim]{ \frametitle{LinuxTools: Valgrind}
+\begin{figure}
+\includegraphics[width=7cm]{pics/valcfg}
+\end{figure}
+}
+\frame[containsverbatim]{ \frametitle{LinuxTools: Valgrind}
+\begin{figure}
+\includegraphics[width=7cm]{pics/valuse}
+\end{figure}
+}
+%\frame[containsverbatim]{ \frametitle{LinuxTools: OProfile Setup}
+%Step 1:
+%\begin{center}
+%\includegraphics[width=6cm]{pics/opcfg}\\
+%\end{center}
+%Step 2:
+%\begin{center}
+%\includegraphics[width=6cm]{pics/opcfg2}
+%\end{center}
+%}
+
+%\frame[containsverbatim]{ \frametitle{LinuxTools: OProfile}
+%The result of running oprofile is that the oprofile view
+%gives you information about your run. You can click inside
+%the view and see the relevant line in the editor.
+%\begin{figure}
+%\includegraphics[width=6cm]{pics/opuse}
+%\end{figure}
+%}
+
+\frame[containsverbatim]{ \frametitle{LinuxTools: gprof}
+\begin{itemize}
+\item Revise makefile to use CC, CFLAGS, and LDFLAGS
+\item Select Project and right click
+\item Project Properties $>$ C/C++ Build $>$ Environment
+\item Click on "Add"
+\item Set ``name'' to ``CFLAGS'' and ``value'' to ``-g -pg''
+\item Compile and run
+\item Linux Tools can process gmon.out
+\end{itemize}
+\begin{figure}
+    \includegraphics[width=5cm]{pics/gprof}
+\end{figure}
+}
+
+\subsection{Hello World in C+MPI}
+\frame{\frametitle{}\begin{centering}\LARGE\insertsubsectionhead\\\end{centering}}
+
+\frame[containsverbatim]{ \frametitle{Hello World in C+MPI}
+Upgrading the program to use MPI
+\begin{itemize}
+\item Add \verb=#include <mpi.h>=
+\item Click inside the program type ``mpi'' then hit Ctrl-space.
+  You'll see a code completion options. Choose ``MPI Init and Finalize''
+  you now have errors in your code. Use the editor to add argc and argv to main.
+\end{itemize}
+\begin{center}
+    \includegraphics[width=6cm]{pics/helloupgrade}\mbox{\hspace{0.5em}}
+\end{center}
+}
+
+\frame[containsverbatim]{ \frametitle{Hello World in C+MPI}
+Building will now produce errors.
+\begin{center}
+    \includegraphics[width=7cm]{pics/hellofail}\mbox{\hspace{0.5em}}
+\end{center}
+}
+
+\frame[containsverbatim]{ \frametitle{Hello World in C+MPI}
+To resolve these errors...
+\begin{itemize}
+\item Right click on the ``Hello'' project in the project explorer view.
+\item Select ``Properties''
+\item Open ``C/C++ General'' and click on ``Paths and Symbols''
+\item Select the C language and click ``Add'' to add the include.
+\end{itemize}
+\begin{center}
+    \includegraphics[width=10cm]{pics/hellofix}\mbox{\hspace{0.5em}}
+\end{center}
+}
+
+\frame[containsverbatim]{ \frametitle{Hello World in C+MPI}
+How did I know the mpi include path?
+\begin{itemize}
+\item Run \verb=sh -x mpicc test.c=
+\item Output will contain something like this:
+    + gcc -m64 -O2 -fPIC -Wl,-z,noexecstack test.c -I/usr/include/mpich2-x86\_64 -L/usr/lib64/mpich2/lib -L/usr/lib64/mpich2/lib -lmpich -lopa -lpthread -lrt
+\item Now you can see the include (/usr/include/mpich2-x86\_64), the lib dir (/usr/lib64/mpich2/lib), libs, etc.
+\end{itemize}
+}
+
+\frame[containsverbatim]{ \frametitle{Hello World in C+MPI}
+\begin{itemize}
+\item While you're still in ``C/C++ General'', click on the ``Library Paths'' tab and fix that. (In my case, add /usr/lib64/mpich2/lib)
+\item Next, go to the ``Libraries'' tab and fix that
+\end{itemize}
+\begin{center}
+    \includegraphics[width=10cm]{pics/hellofix2}\mbox{\hspace{0.5em}}
+\end{center}
+}
+
+\frame[containsverbatim]{ \frametitle{Hello World in C+MPI}
+%\begin{wrapfigure}[10]{r}{1cm}
+%    \includegraphics[width=5cm]{pics/hellorm}\mbox{\hspace{0.5em}}
+%\end{wrapfigure}
+\begin{itemize}
+\item ``Project \verb=>= Build'' should now work again.
+\item Now we need to set up a parallel run.
+Click ``Window \verb=>= Open Perspective \verb=>= Other... \verb=>= Parallel Runtime''
+\item Right click inside the ``Resource Managers'' tab.
+\item Click on ``Add Resource Manager...''
+\item Choose either MPICH2 or OpenMP, whichever you have on your machine.
+\item Click Next \verb=>= Finish.
+\item In a separate window, type mpdboot to start mpich2
+\item Right click on the Resource manager and select start.
+\end{itemize}
+}
+
+\frame{ \frametitle{Hello World in C+MPI}
+\begin{figure}
+    \includegraphics[width=5cm]{pics/hellorm}\mbox{\hspace{0.5em}}
+    \includegraphics[width=5cm]{pics/jobmgr}\mbox{\hspace{0.5em}}
+\end{figure}
+}
+
+\frame[containsverbatim]{ \frametitle{Hello World in C+MPI}
+\begin{figure}
+\begin{itemize}
+\item Click \verb=Run > Run Configurations...=
+\item Right Click on \verb=Parallel Applications= and select \verb=New=
+\item Select the new application, configure the ``Application program.''
+\item Click ``Apply'' and ``Run''
+\end{itemize}
+    \includegraphics[width=6cm]{pics/newpar2}\mbox{\hspace{0.5em}}
+\end{figure}
+}
+
+\frame[containsverbatim]{ \frametitle{Hello World in C+MPI}
+\begin{figure}
+\begin{itemize}
+\item Click \verb=Run > Run Configurations...=
+\item Select your parallel application
+\item Select the ``Resources'' tab
+\item Adjust the ``Number of processes'' to 2
+\item Click ``Apply'' and ``Run''
+\end{itemize}
+    \includegraphics[width=5cm]{pics/newpar3}\mbox{\hspace{0.5em}}
+    \includegraphics[width=5cm]{pics/runpar3}\mbox{\hspace{0.5em}}
+\end{figure}
+}
+
+\subsection{Adding Message Passing}
+\frame{\frametitle{}\begin{centering}\LARGE\insertsubsectionhead\\\end{centering}}
+
+\frame[containsverbatim]{ \frametitle{Hello World in C+MPI}
+\begin{itemize}
+\item Naviagate back to the C/C++ perspective (\verb=Window > Open Perspective > C/C++=)
+\item Click in the code editor between \verb=MPI_Init= and \verb=MPI_Finalize=.
+\item Type ``mpi'' and hit Ctrl-space. Take the ``mpisr'' code completion. A complete skeleton for doing an MPI send and receive will appear. Fill in the missing variable declarations.
+\begin{verbatim}
+    int rank,p,source,dest,tag=66;
+    MPI_Status status;
+    char message[100];
+\end{verbatim}
+\item Alt-P followed by B will build the current project.
+\item Click on the down arrow and select your run config.
+    \includegraphics[width=1cm]{pics/rundown}\mbox{\hspace{0.5em}}
+\end{itemize}
+}
+
+\subsection{Parallel Analysis Tools}
+\frame{\frametitle{}\begin{centering}\LARGE\insertsubsectionhead\\\end{centering}}
+
+\frame[containsverbatim]{ \frametitle{Using Parallel Analysis}
+\begin{itemize}
+\item The most basic form of parallel analysis is available through the
+    parallel analysis button \includegraphics[width=0.5cm]{pics/panbut}
+\item Select a source file in the package explorer
+\item Click the down arrow, then choose ``Show MPI Artifacts''
+\end{itemize}
+\begin{figure}
+    \includegraphics[width=7cm]{pics/panan}
+\end{figure}
+}
+
+\frame[containsverbatim]{ \frametitle{Using Parallel Analysis}
+\begin{itemize}
+\item Select a source file in the package explorer
+\item Click the down arrow, then choose ``MPI Barrier Analysis''
+\end{itemize}
+\begin{figure}
+    \includegraphics[width=7cm]{pics/panpban}
+\end{figure}
+}
+
+\frame[containsverbatim]{ \frametitle{Using Parallel Analysis}
+\begin{itemize}
+\item Now introduce a barrier error
+\item Select a source file in the package explorer
+\item Click the down arrow, then choose ``MPI Barrier Analysis''
+\end{itemize}
+\begin{figure}
+    \includegraphics[width=7cm]{pics/panpbanx}
+\end{figure}
+}
+
+%\frame[containsverbatim]{ \frametitle{Using GEM}
+%\begin{itemize}
+%\item To use the GEM tools, you must first install isp
+%\item Isp is a tool from University of Utah to analyze C/C++-language
+%      programs and discover MPI errors.
+%\item It contains a compiler (ispcc), a tool to run a program (isp), and a viewer. This tool may be used outside of Eclipse.
+%\item Installation of isp follows the familiar pattern of configure / make / make install. Make sure the ispcc command is in your path when you start Eclipse.
+%\item Download page: \verb=http://www.cs.utah.edu/formal_verification/ISP-release/=
+%\end{itemize}
+%}
+
+%\frame[containsverbatim]{ \frametitle{Using GEM}
+%\begin{itemize}
+%\item To run GEM in Eclipse, click the trident.
+%    \includegraphics[width=1cm]{pics/trident}
+%\item You will be prompted for command line arguments. Click ``OK''.
+%    \includegraphics[width=3cm]{pics/gemcmdline}
+%\item GEM will now analyze your code. Click the ``GEM Analyzer'' tab, then ``Browse MPI Calls.''
+%\end{itemize}
+%\begin{figure}
+%    \includegraphics[width=5cm]{pics/gemout}
+%\end{figure}
+%}
+
+%\frame[containsverbatim]{ \frametitle{Using GEM}
+%\begin{itemize}
+%\item Now let's introduce an error. A call to \verb+MPI_Barrier()+ just
+%before the call to \verb=MPI_Send()=
+%\item Save the file. Build the project. Run GEM. Deadlock detected.
+%\end{itemize}
+%\begin{figure}
+%    \includegraphics[width=5.5cm]{pics/gemdead}
+%    \mbox{\vspace{0.5em}}
+%    \includegraphics[width=5.5cm]{pics/gemdead2}
+%\end{figure}
+%}
+
+% Linux Tools
+% Building with Mojave
+% Submitting to a remote machine with the SimFactory resource
+% Need to talk about generic eclipse stuff at some point
+%   Ctrl-R, search, scroll size, Ctrl-space, refactoring
+% Linux tools? Are they part of PTP?
+% Mojave
+% Mojave menu
+
+\section{Mojave}
+\frame{\frametitle{}\begin{centering}\LARGE\insertsectionhead\\\end{centering}}
+
+\frame[containsverbatim]{ \frametitle{Mojave}
+\begin{itemize}
+\item Mojave: A place for Cacti to live
+\item An interface to the Cactus Source Code
+\item An interface to SimFactory
+\end{itemize}
+}
+
+\subsection{Installing Mojave}
+\frame{\frametitle{}\begin{centering}\LARGE\insertsubsectionhead\\\end{centering}}
+
+\frame[containsverbatim]{ \frametitle{Installing Mojave}
+\begin{itemize}
+\item Help $>$ Install New Software $>$ Add...
+\item A popup will appear. Fill in the Name and Location
+\item Hit ``OK'' then ``Next'' and accept, etc. on the following screens.
+\end{itemize}
+\begin{figure}
+    \includegraphics[width=7cm]{pics/minstall}
+    \mbox{\vspace{0.5em}}
+\end{figure}
+}
+
+\subsection{The Wave Equation on your Local Machine}
+\frame{\frametitle{}\begin{centering}\LARGE\insertsubsectionhead\\\end{centering}}
+
+\frame[containsverbatim]{ \frametitle{Mojave}
+\begin{itemize}
+\item To create a Mojave Project, start by selecting
+\verb=File > New Project > Other... > Fortan > Fortran Project=
+\item Select an empty makefile project
+\end{itemize}
+\begin{figure}
+    \includegraphics[width=5.0cm]{pics/fortranwiz}
+\end{figure}
+}
+\frame[containsverbatim]{ \frametitle{Mojave}
+\begin{itemize}
+\item When you get to the last screen of the wizard, you
+    will be prompted to create one of three types of projects.
+\item Select the ``Mojave Download Project'' and create a WaveDemo
+\end{itemize}
+\begin{figure}
+    \includegraphics[width=5.0cm]{pics/mojavewiz}
+\end{figure}
+}
+
+\frame[containsverbatim]{ \frametitle{Mojave}
+\begin{itemize}
+\item Now that you've downloaded a project, please configure using
+the mojave variable editor
+\item \verb=Mojave > Edit Variables...=
+\item Select the basic information needed for a cactus build/run
+\end{itemize}
+\begin{figure}
+    \includegraphics[width=7cm]{pics/mojavevars}\mbox{\vspace{0.5em}}
+\end{figure}
+}
+
+\frame{ \frametitle{Mojave}
+\begin{itemize}
+    \item \textcolor{blue}{Mojave $>$ Build}
+    \item Mojave $>$ CreateSim
+    \item Mojave $>$ RunSim
+\end{itemize}
+\begin{figure}
+    \includegraphics[width=7cm]{pics/mbuild}\mbox{\vspace{0.5em}}
+\end{figure}
+}
+
+\frame{ \frametitle{Mojave}
+\begin{itemize}
+    \item Mojave $>$ Build
+    \item \textcolor{blue}{Mojave $>$ CreateSim}
+    \item Mojave $>$ RunSim
+\end{itemize}
+\begin{figure}
+    \includegraphics[width=7cm]{pics/mcreatesim}\mbox{\vspace{0.5em}}
+\end{figure}
+}
+
+\frame{ \frametitle{Mojave}
+\begin{itemize}
+    \item Mojave $>$ Build
+    \item Mojave $>$ CreateSim
+    \item \textcolor{blue}{Mojave $>$ RunSim}
+\end{itemize}
+\begin{figure}
+    \includegraphics[width=7cm]{pics/mrunsim}\mbox{\vspace{0.5em}}
+\end{figure}
+}
+
+\frame{ \frametitle{Mojave}
+\begin{itemize}
+\item Now to use ranger.
+\item Change variable definitions in Mojave.
+\item Make sure defs.local.ini is correct (you can edit it in Mojave as well, just use Ctrl-R to call up the file)
+\item My ranger configuration looks like this:\\
+{\tt
+[ranger]\\
+user = tg457049\\
+sourcebasedir = /work/00044/@USER@\\
+basedir = /scratch/00044/@USER@/simulations
+}
+\end{itemize}
+\begin{figure}
+    \includegraphics[width=4cm]{pics/rangervars}\mbox{\vspace{0.5em}}
+\end{figure}
+}
+
+\subsection{The Wave Equation on Ranger}
+\frame{\frametitle{}\begin{centering}\LARGE\insertsubsectionhead\\\end{centering}}
+
+% on ranger
+\frame{ \frametitle{Mojave}
+\begin{itemize}
+    \item \textcolor{blue}{Mojave $>$ Build}
+    \item Mojave $>$ CreateSim
+    \item Mojave $>$ SubmitSim
+\end{itemize}
+\begin{figure}
+    \includegraphics[width=7cm]{pics/rbuild}\mbox{\vspace{0.5em}}
+\end{figure}
+}
+
+\frame{ \frametitle{Mojave}
+\begin{itemize}
+    \item Mojave $>$ Build
+    \item \textcolor{blue}{Mojave $>$ CreateSim}
+    \item Mojave $>$ SubmitSim
+\end{itemize}
+\begin{figure}
+    \includegraphics[width=7cm]{pics/rcreatesim}\mbox{\vspace{0.5em}}
+\end{figure}
+}
+
+\frame{ \frametitle{Mojave}
+\begin{itemize}
+    \item Mojave $>$ Build
+    \item Mojave $>$ CreateSim
+    \item \textcolor{blue}{Mojave $>$ SubmitSim}
+\end{itemize}
+\begin{figure}
+    \includegraphics[width=7cm]{pics/rsubmit}\mbox{\vspace{0.5em}}
+\end{figure}
+}
+
+\frame{ \frametitle{Mojave}
+\begin{itemize}
+    \item Mojave $>$ Build
+    \item Mojave $>$ CreateSim
+    \item Mojave $>$ SubmitSim
+    \item \textcolor{blue}{Mojave $>$ ListSims}
+\end{itemize}
+\begin{figure}
+    \includegraphics[width=7cm]{pics/rlist}\mbox{\vspace{0.5em}}
+\end{figure}
+}
+
+\frame{ \frametitle{Mojave}
+\begin{itemize}
+    \item Mojave $>$ Build
+    \item Mojave $>$ CreateSim
+    \item Mojave $>$ SubmitSim
+    \item Mojave $>$ ListSims
+    \item \textcolor{blue}{Mojave $>$ ShowSimOutput}
+\end{itemize}
+\begin{figure}
+    \includegraphics[width=7cm]{pics/routput}\mbox{\vspace{0.5em}}
+\end{figure}
+}
+%on ranger
+
+\frame[containsverbatim]{ \frametitle{Mojave}
+Using the Mojave Menu
+\begin{itemize}
+\item The Mojave menu comes pre-configured with all the basic
+commands you might want to run.
+\item ``New Thorn'' allows you to add to the existing set of thorns.
+\item ``Update Repo'' will invoke GetComponents to update the existing
+    installation.
+\item Build provides an alternative to the \verb=Project > Build= menu.
+\item CreateSim will create a simfactory run configuration
+\item CleanupSim will call simfactory cleanup on a run configuration
+\item PurgeSim will erase the data associated with a simfactory run
+\end{itemize}
+}
+
+\frame[containsverbatim]{ \frametitle{Mojave}
+Advanced Configuration of the Mojave Menu
+\begin{itemize}
+\item Type Ctrl-R, then .mojave.xml.
+\item Before you finish typing,
+Eclipse will find the file and complete the name for you. Pull
+it up in the editor.
+\item The file name will show in matching items.
+\end{itemize}
+\begin{figure}
+    \includegraphics[width=7cm]{pics/filecomplete}\mbox{\vspace{0.5em}}
+\end{figure}
+}
+
+\frame[containsverbatim]{ \frametitle{Mojave}
+\begin{itemize}
+\item .mojave.xml contains variables and actions.
+\item actions are made up of a sequence of commands
+\item commands can have a name, or a name value pair
+\item if a value is not defined, neither the name nor value will
+      be placed into the generated shell command
+\item editing .mojave.xml directly can be useful for adding
+      or changing variables, or adding or changing menu items.
+\end{itemize}
+}
+
+\frame[containsverbatim]{ \frametitle{Mojave}
+\begin{figure}
+    \includegraphics[width=7cm]{pics/mojavexml}\mbox{\vspace{0.5em}}
+\end{figure}
+}
+
+\frame[containsverbatim]{ \frametitle{Mojave}
+\begin{itemize}
+\item Commands can be conditional on a variable definition
+\item Multiple commands can be part of a single action with
+    combined console output.
+\end{itemize}
+\begin{figure}
+    \includegraphics[width=7cm]{pics/cleanbuild}\mbox{\vspace{0.5em}}
+\end{figure}
+}
+
+\frame[containsverbatim]{ \frametitle{Mojave}
+\begin{itemize}
+    \item To update symbols after a cactus build, right click on
+       the project then select \verb=Index > Rebuild=
+    \item Eclipse will then update all its symbol information with
+       the contents of the files generated during the build.
+    \item By default, Mojave builds cactus files inside the
+        \verb=~/.mojaveconfig= directory.
+\end{itemize}
+\begin{figure}
+    \includegraphics[width=7cm]{pics/defines}\mbox{\vspace{0.5em}}
+\end{figure}
+}
+
+\end{document}

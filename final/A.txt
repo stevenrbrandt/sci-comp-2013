@@ -1,0 +1,9 @@
+1. Provide two reasons why the same text file can look different when viewed on different systems or within different tools.
+2.  Explain the difference between centralized and distributed version control systems, including one advantage and one disadvantage for each. Name one software implementation example for each kind of system.
+3. What is SSH? Describe at least three use-cases of SSH.
+4. What is SSH? Why should you never give someone your public SSH key?
+5. According to best practices: should TAB characters be present in (most) source code files? If yes: when and why? If no: why not?
+6. From a scientific viewpoint: name one good and one bad reason to apply obfuscation.
+7. In the context of revision control systems: what are branches, the trunk and tags?
+8. Suppose you have an old checkout/clone from a revision control system repository. Describe a typical workflow of applying a local change to the remote repository.
+9. Name at least three tools that can be used to visualize 1D data. Which of these do you prefer and why?

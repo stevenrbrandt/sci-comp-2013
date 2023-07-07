@@ -1,0 +1,683 @@
+\include{global/preamble}
+
+%\usecolortheme[RGB={200,200,200}]{structure}
+
+\subtitle[Module D]{{\large Module D: Simulations and Application Frameworks}\\*[0.3em]Lecture 3: Cactus Framework Architecture}
+\author[Peter Diener]{Dr Peter Diener}
+\date{November 22, 2013}
+\usecolortheme[RGB={132,186,75}]{structure}
+\definecolor{cactusgreen}{RGB}{132,186,75}
+
+\begin{document}
+
+\frame{\titlepage}
+
+\section*{Outline}
+\frame{\tableofcontents}
+
+\section{Goals}
+\frame{\frametitle{}\begin{centering}\LARGE\insertsectionhead\\\end{centering}}
+
+\frame[containsverbatim]{ \frametitle{Goals}
+  \begin{itemize}
+    \item Lecture 1 introduced:
+      \begin{itemize}
+        \item The concept of a simulation and it's ingredients.
+        \item Super computers from the application scientist's point of view.
+      \end{itemize}
+    \item Lecture 2 introduced:
+      \begin{itemize}
+        \item Parallelisation: data structures, load balancing, domain
+              decomposition.
+        \item Software Engineering: multi-physics simulations, large projects,
+              distributed code development.
+      \end{itemize}
+    \item In this lecture we will discuss:
+      \begin{itemize}
+        \item The component model as software architecture for real-world
+              simulation codes.
+        \item The Cactus Software Framework as a specific example.
+      \end{itemize}
+  \end{itemize}
+}
+
+\section{Summary}
+\frame{\frametitle{}\begin{centering}\LARGE\insertsectionhead\\\end{centering}}
+
+\frame[containsverbatim]{ \frametitle{Summary}
+  \begin{itemize}
+    \item To go from physics to a simulation, one usually
+      \begin{enumerate}
+        \item Finds a mathematical model (e.g.\ PDEs) expressing the physics.
+        \item Discretise the model (e.g.\ PDEs).
+        \item Implement the discretised equations on a supercomputer
+      \end{enumerate}
+    \item Many simulation codes have a similar structure.
+    \item Many supercomputers have a similar architecture.
+  \end{itemize}
+}
+
+\frame[containsverbatim]{ \frametitle{Summary}
+  \begin{itemize}
+    \item Parallel algorithm are necessary due to size of the problems (memory)
+          and computational cost (CPU time).
+    \item MPI is the tool of choice. Requires domain decomposition, advanced
+          data structures and load balancing algorithms.
+    \item A component model is necessary to develop complicated multi-physics
+          codes using geographically distributed code developers.
+    \item A \emph{framework} provides the glue between components.
+    \item We introduced the Einstein Toolkit as a real world example.
+  \end{itemize}
+}
+
+\section{Cactus Software Framework}
+\frame{\frametitle{}\begin{centering}\LARGE\insertsectionhead\\\end{centering}}
+
+\frame[containsverbatim]{ \frametitle{Cactus}
+  \begin{minipage}[t]{8cm}
+    \vspace{0pt}
+    \begin{itemize}
+      \item Open source HPC software framework developed at LSU/AEI/Caltech/PI.
+      \item First version designed at AEI in 1997 in the field of Numerical
+            Relativity to address simulation code difficulties described
+            earlier.
+      \item Redesigned in 1999 to allow it to be more easily used by other
+            fields of science.
+      \item Highly portable (from notebook to supercomputers).
+      \item Highly parallel (tested on $>130,000$ cores).
+    \end{itemize}
+  \end{minipage}
+  \hfill
+  \begin{minipage}[t]{3.0cm}
+    \vspace{0pt}
+    \includegraphics[width=2.7cm]{pics/bincactus2}
+  \end{minipage}
+}
+
+\frame[containsverbatim]{ \frametitle{Cactus Design}
+  \begin{itemize}
+    \item The core of the framework (\emph{the flesh}) is lean. It only provides
+          \emph{glue} between components. It performs no ``real work''.
+    \item The components (\emph{the thorns}) perform all the work, both
+          computational and physics.
+    \item It contains many standard thorns such as providing coordinate
+          systems, standard boundary conditions, MPI drivers, efficient
+          parallel I/O, etc.
+  \end{itemize}
+}
+
+\frame { \frametitle{Covers}
+ \hspace{0cm}\includegraphics[height=3.5cm]{covers/ACMCommunications}
+ \hspace{1cm}\includegraphics[height=3.5cm]{covers/FutureTechPhysCosm}
+ \hspace{1cm}\includegraphics[height=3.5cm]{covers/Gravity}\\\vspace{-1.5cm}
+ \hspace{1cm}\includegraphics[height=3.5cm]{covers/max-planck-research2}
+ \hspace{1cm}\includegraphics[height=3.5cm]{covers/nsffy2006budgetcover}
+ \hspace{1cm}\includegraphics[height=3.5cm]{covers/mmcover}\\\vspace{-1.5cm}
+ \hspace{2cm}\includegraphics[height=3.5cm]{covers/visprocessingtensor}
+ \hspace{1.5cm}\includegraphics[height=3.5cm]{covers/PetascaleComputingBook}
+ \hspace{1cm}\includegraphics[height=3.5cm]{covers/NR689}
+}
+
+\frame { \frametitle{Many arrangements with many modules...}
+  \begin{tabular}{ll}
+    CactusBase& Basic utility and interface thorns\\
+    CactusBench& Benchmark utility thorns\\
+    CactusConnect& Network utility thorns\\
+    CactusElliptic& Elliptic solvers / interface thorns\\
+    CactusExamples& Example thorns\\
+    CactusExternal& External library interface thorns\\
+    CactusIO& General I/O thorns\\
+    CactusNumerical& General numerical methods\\
+    CactusPUGH& Cactus Unigrid Driver thorn\\
+    CactusPUGHIO& I/O thorns specific for PUGH driver\\
+    CactusTest& Thorns for Cactus testing\\
+    CactusUtils& Misc. utility thorns\\
+    CactusWave& Wave example thorns\\
+  \end{tabular}
+}
+
+\frame { \frametitle{Application View}
+The structure of an application that is built upon the Cactus computational
+framework
+\begin{figure}
+\vspace{0.0cm}
+\hspace{0.0cm}
+\centering
+\includegraphics[height=0.5\textwidth]{cactus_appview}
+\end{figure}
+}
+
+\frame { \frametitle{Other Frameworks}
+  \begin{itemize}
+    \item Several other HPC simulation frameworks or framework-like
+          architectures exist.
+      \begin{itemize}
+        \item However, most are libraries rather than frameworks.
+      \end{itemize}
+    \item Frameworks are also common in other software areas.
+      \begin{itemize}
+        \item e.g.\ KDE (linux desktop) and Eclipse (software development
+           environment).
+      \end{itemize}
+  \end{itemize}
+}
+
+\frame { \frametitle{Code assembly}
+  \begin{itemize}
+    \item Different from a ``traditional'' program. In a framework only the
+          end user controls what components (plugins) are present (active).
+    \item In Cactus, this is handled via \emph{thorn lists} defining the
+          names and download locations of all thorns to be compiled into
+          the executable.
+    \item At run time, thorns can be activated if needed for a given simulation.
+  \end{itemize}
+}
+
+\frame[containsverbatim] { \frametitle{Thornlists}
+ \begin{itemize}
+  \item List of thorn names
+  \item Corresponding download methods and locations (optional)
+  \item Supported download methods:
+   \begin{itemize}
+    \item CVS / Subversion / Git / Mercurial
+    \item http / https / ftp
+%    \item Ignore
+   \end{itemize}
+   \item Example:
+ \end{itemize}
+ \centering\begin{minipage}{0.5\linewidth}\tiny
+\begin{verbatim}
+ !CRL_VERSION = 1.0
+
+ # Cactus Flesh
+ !TARGET   = $ROOT
+ !TYPE     = svn
+ !URL      = http://svn.cactuscode.org/flesh/trunk
+ !CHECKOUT = Cactus
+ !NAME     = .
+
+ # Cactus thorns
+ !TARGET   = Cactus/arrangements
+ !TYPE     = svn
+ !URL      = http://svn.cactuscode.org/arrangements/$1/$2/trunk
+ !CHECKOUT = 
+ CactusBase/Boundary
+ CactusBase/CartGrid3D
+ CactusBase/CoordBase
+ CactusBase/IOASCII
+ CactusBase/IOBasic
+\end{verbatim}
+\end{minipage}\\
+}
+
+\frame { \frametitle{Component structure}
+  \begin{itemize}
+    \item A component (thorn) has:
+      \begin{itemize}
+        \item An \emph{interface} that contains its external specification,
+              describing how it looks to the framework and to other thorns.
+        \item An \emph{implementation} that defines how it actually works,
+              including documentation and test cases.
+      \end{itemize}
+  \end{itemize}
+}
+
+\frame { \frametitle{Thorn Structure}
+Inside view of a plug-in module, or thorn for Cactus
+\begin{figure}
+\vspace{0.0cm}
+\hspace{0.0cm}
+\centering
+\includegraphics[height=0.55\textwidth]{thorn_arch}
+\end{figure}
+}
+
+\frame[containsverbatim] { \frametitle{Thorn Structure}
+ Directory structure:\\
+ \centering\begin{minipage}{0.6\linewidth}
+ \begin{alltt}
+\textcolor{gray}{Cactus
+`-- arrangements
+    `-- Introduction}
+        `-- HelloWorld
+            \textcolor{blue}{|-- interface.ccl
+            |-- param.ccl
+            |-- schedule.ccl}
+            |-- README
+            |-- doc
+            |   `-- documentation.tex
+            |-- src
+            |   |-- HelloWorld.c
+            |   `-- make.code.defn
+            |-- test
+            `-- utils
+ \end{alltt}
+ \end{minipage}\\
+}
+
+\frame { \frametitle{Thorn Specification}
+  Four configuration files per thorn:
+  \begin{itemize}
+    \item<1-> \textcolor{blue}{interface.ccl} declares:
+      \begin{itemize}
+        \item an `implementation' name
+        \item inheritance relationships between thorns
+        \item Thorn variables
+        \item Global functions, both provided and used
+      \end{itemize}
+    \item<2-> \textcolor{blue}{schedule.ccl} declares:
+      \begin{itemize}
+        \item When the flesh should schedule which functions
+        \item When which variables should be allocated/freed
+        \item Which variables should be syncronized when
+      \end{itemize}
+    \item<3-> \textcolor{blue}{param.ccl} declares:
+      \begin{itemize}
+        \item Runtime parameters for the thorn
+        \item Use/extension of parameters of other thorns
+      \end{itemize}
+    \item<4-> \textcolor{blue}{configuration.ccl (optional)} declares:
+      \begin{itemize}
+        \item Capabilities provided by or used by the thorn
+        \item Capabilities are usually related to external libraries
+      \end{itemize}
+  \end{itemize}
+}
+
+\frame { \frametitle{Grid Functions}
+  \begin{itemize}
+    \item A discretised physical quantity (e.g.\ density, pressure, 
+          velocity\ldots) lives on a grid function.
+    \item If a regular discretisation is used these are essentially distrubuted
+          arrays (hence ``grid'')
+      \begin{itemize}
+        \item Could also be a graph, tree, etc.\ instead.
+      \end{itemize}
+    \item Grid functions are fundamental data types in a simulation.
+  \end{itemize}
+}
+
+\frame { \frametitle{Example of Cactus Grid Function Shapes}
+  \begin{minipage}[t]{5cm}
+    \vspace{0pt}
+    \begin{center}
+      Adaptive Mesh Refinement and Multi-Block\\
+      \includegraphics[width=4.8cm]{amr-multipatch}
+    \end{center}
+  \end{minipage}\hfill
+  \begin{minipage}[t]{6cm}
+    \vspace{0pt}
+    \begin{center}
+      Multi-Block with distorted coordinate systems\\
+      \includegraphics[width=5.8cm]{distorted-multipatch}
+    \end{center}
+  \end{minipage}
+}
+
+\frame[containsverbatim]{ \frametitle{\texttt{interface.ccl}}
+  Variables:
+  \begin{itemize}
+    \item Flesh needs to know about thorn variables for which it has to care about
+          allocation, parallelism, inter-thorn use
+    \item Scopes: public, private
+    \item Many different basic types (double, integer, string, \ldots
+    \item Different `group types' (grid functions, grid arrays, scalars,
+        \ldots)
+    \item Different `tags' (not to be checkpointed, vector types, \ldots)
+  \end{itemize}
+}
+
+\frame[containsverbatim] { \frametitle{Syntax of \texttt{interface.ccl}}
+\begin{verbatim}
+IMPLEMENTS: <interface name>
+INHERITS: <interface name> ...
+
+[PUBLIC:|PRIVATE:]
+
+[REAL|COMPLEX|INT] <group name> TYPE=[gf|array]
+        TIMELEVELS=<number> [DIM=... SIZE=...]
+{
+  <variable name>
+  ...
+} <description>
+\end{verbatim}
+}
+
+\frame[containsverbatim] { \frametitle{Syntax of \texttt{interface.ccl} cont.}
+\begin{verbatim}
+[REAL|COMPLEX|INT|POINTER] FUNCTION <function name> (
+       [REAL|COMPLEX|INT|STRING|POINTER] \
+               [ARRAY] [IN|OUT] <argument name>,
+       ...
+       )
+
+[USES|REQUIRES] FUNCTION <function name>
+
+PROVIDES FUNCTION <function name>
+        WITH <implementation name> LANG [C|FORTRAN]
+\end{verbatim}
+}
+
+\frame[containsverbatim] { \frametitle{Example \texttt{interface.ccl}}
+\begin{verbatim}
+IMPLEMENTS: wavetoy
+
+INHERITS: grid
+
+PUBLIC:
+
+REAL scalarevolve TYPE=gf TIMELEVELS=3
+{
+  phi
+} "The evolved scalar field"
+\end{verbatim}
+}
+
+\frame[containsverbatim] { \frametitle{Example \texttt{interface.ccl} cont.}
+\begin{verbatim}
+CCTK_INT FUNCTION Boundary_SelectVarForBC (
+        CCTK_POINTER_TO_CONST IN cctkGH,
+        CCTK_INT IN faces,
+        CCTK_INT IN boundary_width,
+        CCTK_INT IN options_handle,
+        CCTK_STRING IN var_name,
+        CCTK_STRING IN bc_name
+        )
+
+REQUIRES FUNCTION Boundary_SelectVarForBC
+\end{verbatim}
+}
+
+\frame { \frametitle{Execution Control Scheduling}
+  \begin{itemize}
+    \item Components are developed independently yet need to execute in a
+          certain order.
+      \begin{itemize}
+        \item e.g.\ calculate pressure first then forces from pressure gradient.
+      \end{itemize}
+    \item Don't want end user to have to specify this. This would require
+          ``manual assembly'' of the components. The end user probably doesn't
+          understand the thorn details.
+  \end{itemize}
+}
+
+\frame[containsverbatim]{ \frametitle{\texttt{schedule.ccl}}
+  \begin{itemize}
+    \item Flesh contains a flexible rule based scheduler
+    \item Order is prescribed in \verb|schedule.ccl|
+    \item Scheduler also handles when variables are allocated, freed or
+          synchronized between parallel processes
+    \item Functions or groups of functions can be
+     \begin{itemize}
+      \item grouped and whole group scheduled
+      \item scheduled before or after each other
+      \item scheduled depending on parameters
+      \item scheduled while some condition is true
+     \end{itemize}
+    \item Flesh scheduler sorts all rules and flags an error for inconsistent
+          schedule requests
+    \item Note: The scheduler is in the process of being revamped
+  \end{itemize}
+}
+
+\frame[containsverbatim]{ \frametitle{Schedule Groups}
+  \begin{description}
+     \item[CCTK\_STARTUP] For routines, run before the grid hierarchy
+                          is set up, for example function registration.
+     \item[CCTK\_PARAMCHECK] For routines that check parameter combinations,
+                             routines registered here only have access to the
+                             grid size and the parameters.
+     \item[CCTK\_BASEGRID] Responsible for setting up coordinates, etc.
+     \item[CCTK\_INITIAL] For generating initial data.
+     \item[CCTK\_POSTINITIAL] Tasks which must be applied after initial data is
+                              created.
+     \item[CCTK\_PRESTEP] Stuff done before the evolution step.
+     \item[CCTK\_EVOL] The evolution step.
+     \item[CCTK\_POSTSTEP] Stuff done after the evolution step.
+     \item[CCTK\_ANALYSIS] For analysing data.
+  \end{description}
+}
+
+\frame { \frametitle{\texttt{schedule.ccl} cont.}
+  \begin{itemize}
+  \item Hierarchy: using schedule groups leads to a \emph{schedule
+      tree}
+  \item Execution order: can schedule \texttt{BEFORE} or
+    \texttt{AFTER} other items\\
+    e.g.: take time step after calculating RHS
+  \item Loops: can schedule \texttt{WHILE} a condition is true\\
+    e.g.: loop while error is too large
+  \item Conditions: can schedule \texttt{if} a parameter is set\\
+    e.g.: choose between boundary conditions
+  \item Perform analysis at run time: \texttt{TRIGGERS} statements:
+    call routine only if result is needed for I/O
+  \end{itemize}
+}
+
+\frame { \frametitle{Example scheduling tree}
+ \centering\includegraphics[height=7cm]{pics/schedule_tree}\hspace{2cm}
+           \includegraphics[height=7cm]{pics/schedule_tree_example}\\
+}
+
+\frame[containsverbatim] { \frametitle{Syntax of \texttt{schedule.ccl}}
+\begin{verbatim}
+SCHEDULE <function name> [AT <schedule bin>|
+                          IN <schedule group>]
+{
+  LANG: [C|Fortran]
+  SYNC: <group name> ...
+} <description>
+
+SCHEDULE GROUP <name> [AT <schedule bin>|
+                       IN <schedule group>]
+{
+} <description>}
+
+STORAGE: <group name>[timelevels] ...
+\end{verbatim}
+}
+
+\frame[containsverbatim] { \frametitle{Example \texttt{schedule.ccl}}
+\begin{verbatim}
+SCHEDULE WaveToyC_Evolution AT evol
+{
+  LANG: C
+} "Evolution of 3D wave equation"
+
+SCHEDULE GROUP WaveToy_Boundaries AT evol \
+               AFTER WaveToyC_Evolution
+{
+} "Boundaries of 3D wave equation"
+
+STORAGE: scalarevolve[3]
+\end{verbatim}
+}
+
+\frame { \frametitle{Simulation Specification}
+  \begin{itemize}
+    \item Most thorns have some parameters that are only set at run time.
+      \begin{itemize}
+        \item e.g.\ number of grid points, initial data model, boundary
+              conditions, number of time steps, output frequency,\ldots
+      \end{itemize}
+    \item End user has to specify these parameters to describe the complete
+          simulation setup when choosing which thorns to activate.
+  \end{itemize}
+}
+
+\frame[containsverbatim]{ \frametitle{\texttt{param.ccl}}
+  \begin{itemize}
+    \item Definition of parameters
+    \item Scopes: Global, Restricted, Private
+    \item Thorns can use and extend each others parameters
+    \item Different types (double, integer, string, keyword, \ldots)
+    \item Range checking and validation
+    \item Steerablility at runtime
+  \end{itemize}
+}
+
+\frame[containsverbatim] { \frametitle{Syntax of \texttt{param.ccl}}
+\begin{verbatim}
+[SHARES: <implementation>]
+
+[PUBLIC:|RESTRICTED:|PRIVATE:]
+
+[BOOLEAN|KEYWORD|INT|REAL|STRING]
+    <parameter name> <description> [STEERABLE=...]
+{
+    <allowed value>             :: <description>
+    <lower bound>:<upper bound> :: <description>
+    <pattern>                   :: <description>
+    ...
+} <default value>
+\end{verbatim}
+}
+
+\frame[containsverbatim] { \frametitle{Example \texttt{param.ccl}}
+\begin{verbatim}
+SHARES: grid
+USES KEYWORD type
+
+PRIVATE:
+KEYWORD initial_data "Type of initial data"
+{
+    "plane"    :: "Plane wave"
+    "gaussian" :: "Gaussian wave"
+} "gaussian"
+
+REAL radius "The radius of the gaussian wave"
+{
+    0:* :: "Positive"
+} 0.0
+\end{verbatim}
+}
+
+\frame { \frametitle{Hello World Thorn}
+  \begin{itemize}
+    \item Begin with a simple C program.
+    \item Design the thorn CCL files.
+    \item Convert the source code to Cactus source.
+    \item Write a parameter file (it needs to activate the thorn).
+    \item Run it and look at the output.
+  \end{itemize}
+}
+
+\frame[containsverbatim]{ \frametitle{Hello World, Standalone}
+ Standalone in C:
+ \begin{verbatim}
+  #include <stdio.h>
+  int main(void)
+  {
+    printf("Hello World!\n");
+    return 0;
+  }
+ \end{verbatim}
+}
+
+\frame[containsverbatim]{ \frametitle{Hello World Thorn}
+ \begin{itemize}
+  \item \verb|interface.ccl|:
+   \begin{verbatim}
+   implements: HelloWorld\end{verbatim}
+ \item \verb|schedule.ccl|:
+  \begin{verbatim}
+   schedule HelloWorld at CCTK_EVOL
+   {
+     LANG: C
+   } "Print Hello World message"\end{verbatim}
+  \item \verb|param.ccl|: empty
+  \item \verb|README|: \tiny
+   \begin{verbatim}
+      Cactus Code Thorn HelloWorld
+      Author(s)    : Frank Löffler <knarf@cct.lsu.edu>
+      Maintainer(s): Frank Löffler <knarf@cct.lsu.edu>
+      Licence      : GPL
+      --------------------------------------------------------------------------
+
+      1. Purpose
+
+      Example thorn for tutorial Introduction to Cactus
+\end{verbatim}
+ \end{itemize}
+}
+
+\frame[containsverbatim]{ \frametitle{Hello World Thorn cont.}
+ \begin{itemize}
+  \item \verb|src/HelloWorld.c|:
+   \begin{verbatim}
+    #include "cctk.h"
+    #include "cctk_Arguments.h"
+
+    void HelloWorld(CCTK_ARGUMENTS)
+    {
+      DECLARE_CCTK_ARGUMENTS
+      CCTK_INFO("Hello World!");
+      return;
+    }\end{verbatim}
+  \item \verb|src/make.code.defn|:
+    \begin{verbatim}
+     SRCS = HelloWorld.c\end{verbatim}
+ \end{itemize}
+}
+
+\frame[containsverbatim]{ \frametitle{Hello World Thorn}
+ \begin{itemize}
+  \item parameter file:
+   \begin{verbatim}
+    ActiveThorns = "HelloWorld"
+    Cactus::cctk_itlast = 10\end{verbatim}
+  \item run: \verb|[mpirun] <cactus executable> <parameter file>|
+ \end{itemize}
+}
+
+\frame[containsverbatim]{ \frametitle{Hello World Thorn}
+ \begin{itemize}
+  \item Screen output:\tiny
+   \begin{verbatim}       10                                  
+  1   0101       ************************  
+  01  1010 10      The Cactus Code V4.0    
+ 1010 1101 011      www.cactuscode.org     
+  1001 100101    ************************  
+    00010101                               
+     100011     (c) Copyright The Authors  
+      0100      GNU Licensed. No Warranty  
+      0101                                 
+
+Cactus version:    4.0.b17
+Compile date:      Sep 08 2011 (13:15:01)
+Run date:          Sep 08 2011 (13:15:54-0500)
+[...]
+
+Activating thorn Cactus...Success -> active implementation Cactus
+Activation requested for 
+--->HelloWorld<---
+Activating thorn HelloWorld...Success -> active implementation HelloWorld
+--------------------------------------------------------------------------------
+INFO (HelloWorld): Hello World!
+INFO (HelloWorld): Hello World!
+INFO (HelloWorld): Hello World!
+INFO (HelloWorld): Hello World!
+[...] 6x
+--------------------------------------------------------------------------------
+Done.
+   \end{verbatim}
+ \end{itemize}
+}
+
+\frame[containsverbatim]{ \frametitle{Cactus Summary}
+ \begin{itemize}
+    \item We introduced the Cactus framework.
+    \item Thorns have implementation (regular code) and interface (ccl) files.
+    \item Introduced ccl file syntax. See users' guide, reference manual and
+          examples for details.
+      \begin{itemize}
+        \item \texttt{make UsersGuide}
+        \item \texttt{make ReferenceManual}
+	\item Resulting pdf files will be in \texttt{Cactus/doc}
+      \end{itemize}
+    \item A parameter file is needed to run a simulation. The parameter
+          file also activates the participating thorns.
+ \end{itemize}
+}
+
+\end{document}

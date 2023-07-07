@@ -1,0 +1,6 @@
+1. You and a group of other researchers have produced a scientific code (using C and MPI) and have run a handful of test cases on Ranger to verify that it functions correctly. Should you release it? If not, what should you do?
+2. You work with a code that simulates hurricanes. In order to be useful the code has to produce a result within six hours. Currently, it takes seven. Upon inspecting the code, you discover it is a reasonably well written MPI parallel code. What might you do to improve the performance?
+3. What are advantages of using an IDE for programming, and why is there sometimes a high resistance especially among experienced programmers?
+4. Name at least three debugging utilities and describe how they work.
+5. What sorts of errors can you identify using valgrind?
+6. Name at least two utilities you can use for profiling?

@@ -1,0 +1,116 @@
+\documentclass[11pt]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{amssymb}
+\usepackage{epstopdf}
+\usepackage{array}
+\usepackage{color}
+\usepackage{psfrag}
+\usepackage{url}
+\pagestyle{empty}
+\textwidth = 6.5 in
+\textheight = 9 in
+\oddsidemargin = 0.0 in
+\evensidemargin = 0.0 in
+\topmargin = 0.0 in
+\headheight = 0.0 in
+\headsep = 0.0 in
+\parskip = 0.1in
+\parindent = 0.0in
+
+\def\journaldata#1#2#3#4{{\it #1} {\bf #2:} #3 (#4)}
+ %
+ % Usage is {journal name} {volume} {pages} {year}
+ % (volume can also be {volume and issue number})
+
+\def\eprint#1{$\langle$#1\hbox{$\rangle$}}
+\def\apj{Astrophys.\ J.}
+
+\newcommand{\code}[1]{\textsf{#1}}
+\newcommand{\todo}[1]{{\color{blue}$\blacksquare$~\textsf{[TODO: #1]}}}
+
+\begin{document}
+
+\section*{Annual Report: TG-SEE100004}
+
+\paragraph{Annual Report for Period:}
+2012 -- 2013
+
+\paragraph{Title:} Graduate Course on ``Scientific Computing''\
+
+\section{Project Participants}
+
+The following personnel participated in the course in the 2012 -- 2013 timeframe.
+
+\subsection{Teaching Personell}
+
+\paragraph{Frank Löffler} (PI) is IT consultant at the Center for Computation
+and Technology. He is expert in simulations in numerical relativity. He
+leads the Einstein Toolkit and co-manages the frameworks/Cactus group
+at LSU. He coordinated the organization of the course and lectured on
+Basic Skills.
+
+\paragraph{Steven Brandt} (co-PI) is faculty at the Center for Computation and
+Technology and at the department for Computer Science at Louisiana State
+University. He co-manages the frameworks/Cactus group. He helped to coordinated
+the organization of the course and lectured on advanced programming tools.
+
+\paragraph{Peter Diener} (co-PI) is faculty at the Center for Computation and
+Technology and at the department for physics  at Louisiana State University. He
+lectured on simulation and application frameworks.
+
+\paragraph{Werner Benger} (co-PI) is IT consultant at the Center for
+Computation and Technology, and is specialist in scientific visualization,
+on which is also lectured within the course.
+
+\paragraph{Shantenu Jha} (co-PI) is faculty at Rutgers the State University,
+but still has an appointment at LSU. He lectured on his primary field of expertise,
+distributed scientific computing.
+
+\section{Activities and Findings}
+
+Including a first general lecture introducing the class and setting the scene
+for scientific computing, the course was divided into five different modules
+(see figure~\ref{fig:overview}),
+covering different topics and each taught by a different instructor. Although the
+modules were designed to be relatively independent, they were also
+designed to be coherent with each other and carry consistent threads.  Each
+module consisted of four to seven lectures depending on the needs of the
+topic, with each lecture lasting eighty minutes.  The module instructor was
+responsible for the module curricula, course work and a component of the final
+exam.
+
+\begin{figure}[t]
+    \centerline{\includegraphics[height=5cm]{figs/Overview}}
+    \caption{\label{fig:overview}
+      The five modules for the graduate level Scientific Computing course. While
+      Modules B to E have each been taught as block, Module A was interwoven with
+      all other modules.}
+\end{figure}
+
+We don't provide details about the curricula in this report. Instead, the
+interested reader is refered to~\cite{FL-Allen2011a} and in particular in
+connection with XSEDE to~\cite{FL-Loeffler2011tg}.
+
+XSEDE provided an essential part of the computing allocation for our graduate
+course on scientific computing. Along with the use of real-world research
+applications, the national production resources of XSEDE provided students with
+experience using a real-world computational environment. The allocation process
+for acquiring resources was straightforward, and XSEDE staff were very
+responsive in dealing with accounts. One of the major outcomes of the course is
+that students were made aware of the breadth of computational facilities
+available to academic researchers in the USA and will hopefully continue to
+make good use of these during their careers. Through this course, students were
+required to face a number of small issues which complicate computational
+research, such as local environments, problems with compilation and deployment
+etc., and this course hopefully further provided students with the confidence
+to work through these problems and to be aware of the options for assistance
+through documentation and help desk facilities.  This course will be offered
+again at Louisiana State University in Fall 2013.
+
+\bibliographystyle{abbrv-url}
+\bibliography{references}
+
+\end{document}
+

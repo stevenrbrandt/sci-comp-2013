@@ -1,0 +1,1084 @@
+\include{global/preamble}
+
+%\usecolortheme[RGB={200,200,200}]{structure}
+
+\subtitle[Module C]{{\large Module C: Advanced Programming Tools}\\*[0.3em]Lectures 1/2: Command Line Tools}
+\author[Dr. Steven R. Brandt]{Dr. Steven R. Brandt}
+\date{September 20, 2013}
+%\usecolortheme[RGB={160,45,140}]{structure}
+\usecolortheme[RGB={80,45,200}]{structure}
+
+\begin{document}
+
+\frame{\titlepage}
+
+\section*{Outline}
+\frame{\tableofcontents}
+
+\section{Goals}
+\frame{\frametitle{}\begin{centering}\LARGE\insertsectionhead\\\end{centering}}
+
+\frame[containsverbatim]{ \frametitle{Goals}
+  \begin{itemize}
+    \item  The module \emph{Advanced Programming Tools} will teach:
+    \begin{itemize}
+      \item binary utilities
+      \item tools for performance analysis
+      \item tools for debugging
+    \end{itemize}
+    \item We will use Cactus as an example of an Application Framework.
+  \end{itemize}
+}
+
+\section{Binary Utilities}
+\frame{\frametitle{}\begin{centering}\LARGE\insertsectionhead\\\end{centering}}
+
+\frame[containsverbatim]{ \frametitle{Binary Utilities}
+    Cactus normally shields programmers from the need
+    to know about the details of the compilation process,
+    but occasionally some difficult problem will be
+    encountered that requires more analysis.
+    \begin{itemize}
+    \item nm/readelf
+    \item c++filt
+    \item ldd
+    \end{itemize}
+}
+
+\subsection{nm - list symbols}
+\frame{\frametitle{}\begin{centering}\LARGE\insertsubsectionhead\\\end{centering}}
+
+\frame[containsverbatim]{ \frametitle{nm - list symbols}
+  This tool is useful for figuring out dependencies when
+  things are not compiling properly.
+  \begin{itemize}
+    \item T indicates a subroutine defined in the current object
+    \item U indicates a subroutine or external variable that is
+            defined in an external object file or library
+    \item B a variable that is defined in the uninitialized data
+            segment
+    \item C a variable that is defined in the uninitialized data
+            segment
+    \item b a static variable that is defined in the uninitialized data
+            segment
+    \item D a variable that is defined in the initialized data
+            segment
+    \item d a variable that is defined in the initialized data
+            segment
+  \end{itemize}
+}
+\frame[containsverbatim]{ \frametitle{nm - list symbols}
+    \begin{verbatim}
+// demo.c
+extern int var1,var2;
+int var1;
+int var2=3;
+
+static int var3,var4=2;
+
+void subroutine1();
+void subroutine2();
+
+void subroutine2() {
+    var4=var3=1;
+    subroutine1();
+}
+    \end{verbatim}
+}
+
+\frame[containsverbatim]{ \frametitle{nm - list symbols}
+    \begin{verbatim}
+[sbrandt@localhost]$ gcc -c demo.c
+[sbrandt@localhost]$ nm demo.o
+                 U subroutine1
+0000000000000000 T subroutine2
+0000000000000004 C var1
+0000000000000000 D var2
+0000000000000000 b var3
+0000000000000004 d var4
+    \end{verbatim}
+}
+
+\frame[containsverbatim]{ \frametitle{nm - list symbols}
+Things turn out differently with the C++ compiler.
+The C++ compiler scrambles type information into the
+symbol name.
+    \begin{verbatim}
+[sbrandt@localhost]$ g++ -c demo.c
+[sbrandt@localhost]$ nm demo.o
+                 U _Z11subroutine1v
+0000000000000000 T _Z11subroutine2v
+0000000000000004 b _ZL4var3
+0000000000000004 d _ZL4var4
+                 U __gxx_personality_v0
+0000000000000000 B var1
+0000000000000000 D var2
+    \end{verbatim}
+}
+
+\frame[containsverbatim]{ \frametitle{nm - list symbols}
+    Note that -C unscrambles the C++ names as they appear
+    inside the object files. This makes things more readable.
+    \begin{verbatim}
+[sbrandt@localhost]$ g++ -c demo.c
+[sbrandt@localhost]$ nm -C demo.o
+                 U subroutine1()
+0000000000000000 T subroutine2()
+0000000000000004 b var3
+0000000000000004 d var4
+                 U __gxx_personality_v0
+0000000000000000 B var1
+0000000000000000 D var2
+    \end{verbatim}
+}
+
+\frame[containsverbatim]{ \frametitle{nm - list symbols}
+    Using the -A flag to add the file name to each line
+    {\small\begin{verbatim}
+sbrandt@localhost$ gcc -c demo.c demo2.c
+sbrandt@localhost$ nm -g -A *.o
+demo2.o:0000000000000006 T main
+demo2.o:                 U printf
+demo2.o:0000000000000000 T subroutine1
+demo2.o:                 U subroutine2
+demo2.o:0000000000000004 C var1
+demo.o:                 U subroutine1
+demo.o:0000000000000000 T subroutine2
+demo.o:0000000000000004 C var1
+demo.o:0000000000000000 D var2
+    \end{verbatim}
+}
+    Now you can combine with grep and see which object file
+    defines a symbol and which object files need it.
+    {\small\begin{verbatim}
+sbrandt@localhost$ nm -g -A *.o|grep subroutine1
+demo2.o:0000000000000000 T subroutine1
+demo.o:                 U subroutine1
+    \end{verbatim}
+}
+}
+
+\frame[containsverbatim]{ \frametitle{nm - list symbols}
+    Using the -u flag to list undefined symbols
+    {\small\begin{verbatim}
+sbrandt@localhost$ gcc -c -g demo.c demo2.c
+sbrandt@localhost$ nm -uA *.o
+demo2.o:                 U printf
+demo2.o:                 U subroutine2
+demo.o:                 U subroutine1
+    \end{verbatim}
+}
+    If you'd like to know where you've tried to use those
+    undefined symbols in your source code, use -l.
+    {\small\begin{verbatim}
+sbrandt@localhost$ nm -uAl *.o
+demo2.o:                 U printf   /home/sbrandt/demo2.c:8
+demo2.o:                 U subroutine2  /home/sbrandt/demo2.c:7
+demo.o:                 U subroutine1   /home/sbrandt/demo.c:13
+    \end{verbatim}
+}
+}
+
+\subsection{readelf - display information about ELF tables}
+
+
+\frame[containsverbatim]{ \frametitle{readelf - display information about ELF tables}
+    ELF stands for ``Executable and Linking Format." ELF can be used to get
+    essentially the same information as nm, with one important advantage. It
+    can work on some files that nm can't (stripped shared libraries).
+    Lines with UND aren't defined in the current source file.
+    {\small\begin{verbatim}
+sbrandt@localhost$ readelf -s demo.o
+
+Symbol table '.symtab' contains 14 entries:
+   Num:    Value          Size Type    Bind   Vis      Ndx Name
+     0: 0000000000000000     0 NOTYPE  LOCAL  DEFAULT  UND 
+     1: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS demo.c
+     2: 0000000000000000     0 SECTION LOCAL  DEFAULT    1 
+     3: 0000000000000000     0 SECTION LOCAL  DEFAULT    3 
+     4: 0000000000000000     0 SECTION LOCAL  DEFAULT    4 
+     5: 0000000000000000     4 OBJECT  LOCAL  DEFAULT    4 var3
+     6: 0000000000000004     4 OBJECT  LOCAL  DEFAULT    3 var4
+     7: 0000000000000000     0 SECTION LOCAL  DEFAULT    6 
+    \end{verbatim}
+}
+}
+
+\subsection{c++filt - demangle C++ and Java symbols}
+\frame{\frametitle{}\begin{centering}\LARGE\insertsubsectionhead\\\end{centering}}
+
+\frame[containsverbatim]{ \frametitle{c++filt - demangle C++ and Java symbols}
+\begin{itemize}
+\item Simple tool that transforms mangled C++ symbol definitions
+      on the input stream to human readable form.
+\item ``nm demo.o | c++filt" does the same thing as ``nm -C demo.o"
+\item readelf has no -C flag, so ``readelf -s demo.o $|$ c++filt" is how to do it.
+\item First version was written by yours truly in the 80's.
+\end{itemize}
+}
+
+\subsection{ldd - shared library dependencies}
+\frame{\frametitle{}\begin{centering}\LARGE\insertsubsectionhead\\\end{centering}}
+
+\frame[containsverbatim]{ \frametitle{ldd - shared library dependencies}
+
+    Ldd can tell you where your shared libraries are.
+    \begin{verbatim}
+[sbrandt@localhost]$ gcc --warn-all demo.c demo2.c
+[sbrandt@localhost]$ ldd ./a.out
+    linux-vdso.so.1 =>  (0x00007fff53dff000)
+    libc.so.6 => /lib64/libc.so.6 (0x000000376d600000)
+    /lib64/ld-linux-x86-64.so.2 (0x000000376d200000)
+
+    \end{verbatim}
+}
+\frame[containsverbatim]{ \frametitle{ldd - shared library dependencies}
+Sometimes ldd can't find your shared library. You can fix this by
+modifying the LD\_LIBRARY\_PATH variable.
+
+First, let's create our own shared library from our demo.c source
+file. We need the -shared and -fPIC (Position Independent Code)
+flags to make this work.
+    \begin{verbatim}
+[sbrandt@localhost]$ gcc -fPIC -shared -o libdemo.so demo.c
+[sbrandt@localhost]$ gcc demo2.c libdemo.so
+sbrandt@localhost$ ./a.out
+./a.out: error while loading shared libraries: libdemo.so:
+    cannot open shared object file: No such file or directory
+    \end{verbatim}
+}
+\frame[containsverbatim]{ \frametitle{ldd - shared library dependencies}
+What went wrong?
+    \begin{verbatim}
+[sbrandt@localhost]$ ldd a.out
+    linux-vdso.so.1 =>  (0x00007ffffc3ff000)
+    libdemo.so => not found
+    libc.so.6 => /lib64/libc.so.6 (0x000000376d600000)
+    /lib64/ld-linux-x86-64.so.2 (0x000000376d200000)
+    \end{verbatim}
+You see that libdemo.so is not found? That's because linux won't
+look in the current directory by default. We have to tell it
+to do so.
+    \begin{verbatim}
+[sbrandt@localhost]$ LD_LIBRARY_PATH=. ldd a.out
+    linux-vdso.so.1 =>  (0x00007fff30784000)
+    libdemo.so => ./libdemo.so (0x00007f9634fe7000)
+    libc.so.6 => /lib64/libc.so.6 (0x000000376d600000)
+    /lib64/ld-linux-x86-64.so.2 (0x000000376d200000)
+    \end{verbatim}
+}
+
+\frame[containsverbatim]{ \frametitle{alternate shared library dependency tracing}
+An alternative to using ldd is to set some variables. Note that LD\_DEBUG appends the process id to the file name. That's helpful for MPI. Note that "ls -t \verb=|= head -1" shows the most recently modified file.
+
+    {\small\begin{verbatim}
+[sbrandt@localhost]$ export LD_DEBUG=libs
+[sbrandt@localhost]$ export LD_DEBUG_OUTPUT=debug.txt
+[sbrandt@localhost]$ ./a.out
+./a.out: error while loading shared libraries: libdemo.so:
+    cannot open shared object file: No such file or directory
+[sbrandt@localhost]$ ls -t | head -1
+debug.txt.4478
+[sbrandt@localhost]$ cat debug.txt.4478
+      4478: find library=libdemo.so [0]; searching
+      4478:  search cache=/etc/ld.so.cache
+      4478:  search path=/lib64/tls/x86_64:/lib64/tls:/lib64/x86_64:/lib64:/usr/lib64/tls/x86_64:/usr/lib64/tls:/usr/lib64/x86_64:/usr/lib64        (system search path)
+      4478:   trying file=/lib64/tls/x86_64/libdemo.so
+      4478:   trying file=/lib64/tls/libdemo.so
+      ...
+    \end{verbatim}
+}
+}
+
+\section{Debugging Utilities}
+\frame{\frametitle{}\begin{centering}\LARGE\insertsectionhead\\\end{centering}}
+
+\frame[containsverbatim]{ \frametitle{Debugging Utilities}
+Memory problems (indexing outside of array bounds, using unallocated memory, etc.) and race conditions are insidious problems.
+Results may be difficult to reproduce and the causes difficult to identify. You have to debug early and often if you want to stay sane.
+These tools can help you.
+\begin{itemize}
+\item gdb
+\item Valgrind
+\item Helgrind
+\item clang
+\item misc
+\end{itemize}
+}
+\subsection{gdb}
+\frame{\frametitle{}\begin{centering}\LARGE\insertsubsectionhead\\\end{centering}}
+
+\frame[containsverbatim]{ \frametitle{gdb}
+The gnu debugger is widely available. Very helpful when you have a memory
+problem. It has many useful features:
+\begin{enumerate}
+\item where - Gives the stack trace at the point of failure
+\item print - Prints the contents of a variable
+\item break/clear - Set/clear break point
+\item step/next - advance line by line
+\item run/cont - run/continue
+\end{enumerate}
+}
+\frame[containsverbatim]{ \frametitle{gdb}
+Let's see it in action.
+This code has an obvious problem:
+\begin{verbatim}
+int main() {
+    int *a = 0;
+    a[10] = 4;
+    return 0;
+}
+\end{verbatim}
+}
+\frame[containsverbatim]{ \frametitle{gdb}
+\begin{verbatim}
+sbrandt@sbrandt-think examples$ gdb ./test1
+GNU gdb (GDB) Fedora (7.6-34.fc19)
+Copyright (C) 2013 Free Software Foundation, Inc.
+...
+Reading symbols from /home/sbrandt/repos/sci-comp-2013/Module-C/examples/test1...done.
+(gdb) run 
+Starting program: /home/sbrandt/repos/sci-comp-2013/Module-C/examples/test1 
+
+Program received signal SIGSEGV, Segmentation fault.
+0x00000000004005c4 in main () at test1.c:4
+4       a[10] = 4;
+Missing separate debuginfos, use: debuginfo-install glibc-2.17-14.fc19.x86_64 libgcc-4.8.1-1.fc19.x86_64 libstdc++-4.8.1-1.fc19.x86_64
+(gdb) where
+#0  0x00000000004005c4 in main () at test1.c:4
+(gdb) 
+\end{verbatim}
+}
+\frame[containsverbatim]{ \frametitle{gdb}
+\begin{verbatim}
+#include <stdlib.h>
+void set10(int *a) {
+    a[10] = 4;
+}
+int main() {
+    int *a = (int *)malloc(11*sizeof(int));
+    set10(a);
+    set10(0);
+    return 0;
+}
+
+(gdb) where
+#0  0x0000000000400600 in set10 (a=0x0) at test1b.c:3
+#1  0x0000000000400637 in main () at test1b.c:8
+\end{verbatim}
+}
+\frame[containsverbatim]{ \frametitle{gdb}
+{\scriptsize
+\begin{verbatim}
+(gdb) run
+(gdb) break test1b.c:6
+Breakpoint 1, main () at test1b.c:6
+6       int *a = (int *)malloc(11*sizeof(int));
+(gdb) step
+7       set10(a);
+(gdb) step
+set10 (a=0x602010) at test1b.c:3
+3       a[10] = 4;
+(gdb) step
+4   }
+(gdb) step
+main () at test1b.c:8
+8       set10(0);
+(gdb) step
+set10 (a=0x0) at test1b.c:3
+3       a[10] = 4;
+(gdb) step
+Program received signal SIGSEGV, Segmentation fault.
+0x0000000000400600 in set10 (a=0x0) at test1b.c:3
+3       a[10] = 4;
+\end{verbatim}
+}
+}
+
+\subsection{Valgrind}
+\frame{\frametitle{}\begin{centering}\LARGE\insertsubsectionhead\\\end{centering}}
+
+\frame[containsverbatim]{ \frametitle{Valgrind}
+Valgrind simulates your program in memory. It is slow, but it reveals
+many problems.
+\begin{verbatim}
+[sbrandt@localhost t]$ cat test.c
+#include <stdio.h>
+int main() {
+    int a;
+    if(a < 0) printf("a is negative\n");
+    return 0;
+}
+[sbrandt@localhost t]$ gcc -g test.c
+[sbrandt@localhost t]$ valgrind ./a.out
+...
+==3512== Conditional jump or move depends on uninitialized value(s)
+==3512==    at 0x4004D0: main (test.c:4)
+...
+\end{verbatim}
+}
+
+\frame[containsverbatim]{ \frametitle{Valgrind}
+\begin{verbatim}
+[sbrandt@localhost t]$ cat test2.c
+#include <stdlib.h>
+int main() {
+    int *a = (int*)malloc(10*sizeof(int));
+    a[10] = 4;
+    return 0;
+}
+[sbrandt@localhost t]$ valgrind ./a.out
+...
+==3482== Invalid write of size 4
+==3482==    at 0x4004E2: main (in /home/sbrandt/c/t/a.out)
+==3482==  Address 0x4c0c068 is 0 bytes after a block of size 40 alloc'd
+==3482==    at 0x4A0515D: malloc (vg_replace_malloc.c:195)
+==3482==    by 0x4004D5: main (in /home/sbrandt/c/t/a.out)
+...
+\end{verbatim}
+}
+\frame[containsverbatim]{ \frametitle{Valgrind}
+We fix test2.c like this:
+\begin{verbatim}
+#include <stdlib.h>
+int main() {
+    int *a = (int*)malloc(10*sizeof(int));
+    a[9] = 4;
+    return 0;
+}
+\end{verbatim}
+Can Valgrind tell us anything more about our program?
+}
+\frame[containsverbatim]{ \frametitle{Valgrind}
+{\scriptsize
+\begin{verbatim}
+sbrandt@sbrandt-think examples$ valgrind --leak-check=full ./a.out
+==15928== Memcheck, a memory error detector
+==15928== Copyright (C) 2002-2012, and GNU GPL'd, by Julian Seward et al.
+==15928== Command: ./a.out
+==15928== 
+==15928== HEAP SUMMARY:
+==15928==     in use at exit: 40 bytes in 1 blocks
+==15928==   total heap usage: 1 allocs, 0 frees, 40 bytes allocated
+==15928== 
+==15928== 40 bytes in 1 blocks are definitely lost in loss record 1 of 1
+==15928==    at 0x4A06409: malloc (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+==15928==    by 0x400541: main (in /home/sbrandt/repos/sci-comp-2013/Module-C/examples/a.out)
+==15928== 
+==15928== LEAK SUMMARY:
+==15928==    definitely lost: 40 bytes in 1 blocks
+==15928==    indirectly lost: 0 bytes in 0 blocks
+==15928==      possibly lost: 0 bytes in 0 blocks
+==15928==    still reachable: 0 bytes in 0 blocks
+==15928==         suppressed: 0 bytes in 0 blocks
+==15928== 
+==15928== For counts of detected and suppressed errors, rerun with: -v
+==15928== ERROR SUMMARY: 1 errors from 1 contexts (suppressed: 2 from 2)
+\end{verbatim}
+}
+}
+
+\subsection{Helgrind}
+\frame{\frametitle{}\begin{centering}\LARGE\insertsubsectionhead\\\end{centering}}
+
+\frame[containsverbatim]{ \frametitle{Helgrind}
+Useful for debugging threads. Prone to false positives.
+{\small\begin{verbatim}
+[sbrandt@localhost]$ cat race.c
+#include <stdio.h>
+#include <pthread.h>
+int i = 0;
+void *task(void *v) {
+    for(int j=0;j<100000;j++) i++;
+    return 0;
+}
+int main() {
+    const int N = 10; pthread_t p[N];
+    for(int i=0;i<N;i++)
+        pthread_create(&p[i],0,task,0);
+    for(int i=0;i<N;i++)
+        pthread_join(p[i],0);
+    printf("i=%d\n",i);
+}
+\end{verbatim}
+}
+}
+
+\frame[containsverbatim]{ \frametitle{Helgrind}
+We can see that we have a problem on line 5.
+{\small\begin{verbatim}
+[sbrandt@localhost]$ gcc -std=c99 -g race.c -lpthread
+[sbrandt@localhost]$ valgrind --tool=helgrind \
+    --log-file=val.out ./a.out 2>&1 | grep race.c
+i=1000000
+sbrandt@localhost$ grep race.c val.out|sort -u
+==20857==    at 0x4005D5: task (race.c:5)
+==20857==    at 0x4005DE: task (race.c:5)
+==20857==    by 0x40067A: main (race.c:11)
+\end{verbatim}
+}
+}
+
+\frame[containsverbatim]{ \frametitle{Helgrind}
+Here's one way we can fix it, using an atomic operation.
+{\small\begin{verbatim}
+#include <stdio.h>
+#include <pthread.h>
+int i = 0;
+void *task(void *v) {
+    for(int j=0;j<100000;j++)
+        __sync_add_and_fetch(&i,1);
+    return 0;
+}
+int main() {
+    const int N = 10; pthread_t p[N];
+    for(int i=0;i<N;i++)
+        pthread_create(&p[i],0,task,0);
+    for(int i=0;i<N;i++)
+        pthread_join(p[i],0);
+    printf("i=%d\n",i);
+}
+\end{verbatim}
+}
+}
+
+\frame[containsverbatim]{ \frametitle{Helgrind}
+Now everything is fixed!
+{\small\begin{verbatim}
+[sbrandt@localhost]$ gcc -std=c99 -g race.c -lpthread
+[sbrandt@localhost]$ valgrind --tool=helgrind \
+    --log-file=val.out ./a.out 2>&1 | grep race.c
+i=1000000
+sbrandt@localhost$ grep race.c val.out|sort -u
+\end{verbatim}
+}
+Note that Helgrind works well with pthreads, but
+doesn't work well with other forms of thread
+parallelism.
+}
+
+%\subsection{Electric Fence}
+%\frame{\frametitle{}\begin{centering}\LARGE\insertsubsectionhead\\\end{centering}}
+
+%\frame[containsverbatim]{ \frametitle{Electric Fence}
+%Electric Fence is a compile time tool that can help you
+%spot a number of errors during runtime. Electric Fence
+%works by replacing malloc.
+%\begin{verbatim}
+%[sbrandt@localhost t]$ cat test2.c
+%#include <stdlib.h>
+%int main() {
+%    int *a = (int*)malloc(10*sizeof(int));
+%    a[10] = 4;
+%    return 0;
+%}
+%[sbrandt@localhost t]$ gcc -g test2.c -lefence
+%\end{verbatim}
+%}
+
+%\frame[containsverbatim]{ \frametitle{Electric Fence}
+%Electric fence triggers an abort when an error occurs. You can then
+%use gdb to locate the line on which the error occurred.
+%\begin{verbatim}
+%[sbrandt@localhost t]$ gdb ./a.out
+%GNU gdb (GDB) Fedora (7.1-34.fc13)
+%(gdb) run 
+%Starting program: /home/sbrandt/c/t/a.out 
+
+%  Electric Fence 2.2.2 Copyright (C) 1987-1999 Bruce Perens <bruce@perens.com>
+
+%Program received signal SIGSEGV, Segmentation fault.
+%0x00000000004005e2 in main () at test2.c:4
+%4       a[10] = 4;
+%Missing separate debuginfos, use: debuginfo-install ElectricFence-2.2.2-27.fc12.x86_64 glibc-2.12.2-1.x86_64
+%\end{verbatim}
+%}
+
+%\frame[containsverbatim]{ \frametitle{Electric Fence}
+%\begin{itemize}
+%\item Electric Fence dies when malloc(0) is called.
+%\item malloc(0) is called in the regular expression library
+%  by Cactus. Electric Fence will ignore this error if you set
+%  the environment variable EF\_ALLOW\_MALLOC\_0=1.
+%\item Electric Fence greatly increases the amount of memory used
+%  by an application. In Cactus, this prevents it from being a useful
+%  diagnostic.
+%\end{itemize}
+%}
+
+\subsection{Clang}
+\frame{\frametitle{}\begin{centering}\LARGE\insertsubsectionhead\\\end{centering}}
+
+\frame[containsverbatim]{ \frametitle{clang}
+\begin{itemize}
+\item clang stands for C-language compiler. Based on the llvm (Low Level virtual machine) project.
+\item download it here \verb=http://clang.llvm.org/get_started.html#build=
+\item performs details source code analysis
+\end{itemize}
+}
+
+\frame[containsverbatim]{ \frametitle{clang}
+Just using the clang compiler can help you find new bugs
+\begin{verbatim}
+[sbrandt@localhost t]$ cat test3.c
+int main() {
+    int b[1];
+    b[2] = 3;
+}
+[sbrandt@localhost t]$ clang test3.c
+test3.c:3:5: warning: array index of '2' indexes past the end of an array
+      (that contains 1 element) [-Warray-bounds]
+    b[2] = 3;
+    ^ ~
+test3.c:2:5: note: array 'b' declared here
+    int b[1];
+    ^
+1 warning generated.
+\end{verbatim}
+}
+
+\frame[containsverbatim]{ \frametitle{clang}
+Another way to discover problems is with -fsanitize=undefined-trap -fsanitize-undefined-trap-on-error.
+{\small\begin{verbatim}
+[sbrandt@localhost t]$ cat test4.c
+void foo(int n,int v) {
+    int f[2];
+    f[n] = v;
+}
+int main() {
+    foo(3,3);
+    return 0;
+}
+[sbrandt@localhost t]$ clang -g -fsanitize=undefined-trap \
+    -fsanitize-undefined-trap-on-error test4.c
+[sbrandt@localhost t]$ gdb -eval-command=run ./a.out
+Program received signal SIGILL, Illegal instruction.
+0x000000000040049c in foo (n=3, v=3) at test4.c:3
+3       f[n] = v;
+\end{verbatim}
+}
+}
+
+\frame[containsverbatim]{ \frametitle{clang}
+Integer overflow problems can be discovered with -ftrapv.
+\begin{verbatim}
+[sbrandt@localhost t]$ cat test5.c
+#include <limits.h>
+#include <stdio.h>
+void foo(int n) {
+    if(n > n+1) printf("overflow\n");
+}
+int main() {
+    foo(INT_MAX);
+}
+[sbrandt@localhost t]$ clang -g -ftrapv test5.c
+[sbrandt@localhost t]$ gdb -eval-command=run ./a.out
+Program received signal SIGILL, Illegal instruction.
+0x00000000004004f3 in foo (n=2147483647) at test5.c:4
+4       if(n > n+1) printf("overflow\n");
+\end{verbatim}
+}
+
+\subsection{Misc.}
+\frame{\frametitle{}\begin{centering}\LARGE\insertsubsectionhead\\\end{centering}}
+
+\frame[containsverbatim]{ \frametitle{Misc.}
+\begin{itemize}
+\item gfortran -fbounds-check - generates bounds checking code for
+fortran. This flag is {\it silently ignored} for gcc and g++.
+\item Cactus debug build - automatically detects indexes out of
+bounds in grid functions, plus does other things
+\item In general, using a different compiler or architecture
+can be helpful in exposing bugs or problems in code.
+\item \verb=#include <assert.h>= is very helpful. Use -DNDEBUG
+to make assertions go away.
+\end{itemize}
+}
+
+\frame[containsverbatim]{ \frametitle{Misc.}
+\begin{verbatim}
+[sbrandt@localhost ~]$ cat here.h
+#ifndef HERE_H_
+#define HERE_H_
+#include <stdio.h>
+#define HERE printf("%s,%d\n",__FILE__,__LINE__);
+#define VARN(X) printf("%s=%d\n",#X,X);
+#define VAR(X) printf("%s=%d ",#X,X);
+#endif
+\end{verbatim}
+}
+
+\section{Performance Utilities}
+\frame{\frametitle{}\begin{centering}\LARGE\insertsectionhead\\\end{centering}}
+
+\frame[containsverbatim]{ \frametitle{Performance Utilities}
+\begin{itemize}
+\item gprof
+\item Coverage Testing
+\item Memusage
+\item Profile-Guided Optimization
+\item hpctoolkit
+\item perfexpert
+\end{itemize}
+}
+
+\subsection{Gprof}
+\frame{\frametitle{}\begin{centering}\LARGE\insertsubsectionhead\\\end{centering}}
+
+\frame[containsverbatim]{ \frametitle{gprof}
+Gprof provides basic, low-level profiling of source code. Helps you find your performance
+hot spots and target your optimization efforts. To use, build your code with \verb=-pg=.
+
+\begin{verbatim}
+g++ -pg -g -o wave wave.cpp
+\end{verbatim}
+
+When you run your code, a file named \verb=gmon.out= is generated.
+To view the results, use the \verb=gprof= command.
+
+\begin{verbatim}
+gprof wave gmon.out -p
+\end{verbatim}
+}
+\frame[containsverbatim]{ \frametitle{gprof}
+{\scriptsize
+\begin{verbatim}
+sbrandt@sbrandt-think examples$ gprof wave gmon.out -p
+Flat profile:
+
+Each sample counts as 0.01 seconds.
+  %   cumulative   self              self     total           
+ time   seconds   seconds    calls  us/call  us/call  name    
+100.27      0.01     0.01     4000     2.51     2.51  deriv(double*, double*)
+  0.00      0.01     0.00    19702     0.00     0.00  x(int)
+  0.00      0.01     0.00     8000     0.00     0.00  bound(double*)
+  0.00      0.01     0.00     1000     0.00    10.03  update(int)
+  0.00      0.01     0.00      200     0.00     0.00  print_minmax(int)
+  0.00      0.01     0.00      200     0.00     0.00  print(double*, int)
+  0.00      0.01     0.00      100     0.00     0.00  sq(double)
+  0.00      0.01     0.00        1     0.00     0.00  _GLOBAL__sub_I_u
+  0.00      0.01     0.00        1     0.00     0.00  __static_initialization_and_destruction_0(int, int)
+  0.00      0.01     0.00        1     0.00     0.00  init()
+
+\end{verbatim}
+}
+Who knew that \verb=deriv= was our most expensive routine?
+}
+
+\subsection{Coverage Testing}
+\frame{\frametitle{}\begin{centering}\LARGE\insertsubsectionhead\\\end{centering}}
+
+\frame[containsverbatim]{ \frametitle{Coverage Testing}
+Coverage testing builds in automatic instrumentation of your
+code to determine which lines are being run and how often. It
+can help you construct more thorough tests.
+{\small\begin{verbatim}
+[sbrandt@localhost t]$ gcc -ftest-coverage -fprofile-arcs test2.c
+[sbrandt@localhost t]$ ./a.out
+[sbrandt@localhost t]$ ls -t | head -3
+test2.gcda
+a.out
+test2.gcno
+\end{verbatim}
+}
+}
+\frame[containsverbatim]{ \frametitle{Coverage Testing}
+{\small\begin{verbatim}
+[sbrandt@localhost t]$ gcov test2.gcda
+File 'test2.c'
+Lines executed:100.00% of 4
+test2.c:creating 'test2.c.gcov'
+
+[sbrandt@localhost t]$ cat test2.c.gcov 
+        -:    0:Source:test2.c
+        -:    0:Graph:test2.gcno
+        -:    0:Data:test2.gcda
+        -:    0:Runs:1
+        -:    0:Programs:1
+        -:    1:#include <stdlib.h>
+        1:    2:int main() {
+        1:    3:    int *a = (int*)malloc(10*sizeof(int));
+        1:    4:    a[10] = 4;
+        1:    5:    return 0;
+        -:    6:}
+\end{verbatim}
+}
+}
+
+\subsection{Memusage}
+\frame{\frametitle{}\begin{centering}\LARGE\insertsubsectionhead\\\end{centering}}
+
+\frame[containsverbatim]{ \frametitle{Memusage}
+Memusage is a utility which can help you monitor your
+heap and stack usage.
+{\small\begin{verbatim}
+sbrandt@localhost$ cat fib.c
+#include <stdio.h>
+
+int fib(int n) {
+    if(n < 2)
+        return n;
+    return fib(n-1)+fib(n-2);
+}
+
+int main() {
+    int *n = new int(35);
+    printf("fib(%d)=%d\n",*n,fib(*n));
+    return 0;
+}
+sbrandt@localhost$ g++ fib.c -lmemusage
+\end{verbatim}
+}
+}
+\frame[containsverbatim]{ \frametitle{Memusage}
+{\small\begin{verbatim}
+sbrandt@localhost$ MEMUSAGE_OUTPUT=mem.out \
+    LD_PRELOAD=/usr/lib64/libmemusage.so ./a.out
+fib(35)=9227465
+
+Memory usage summary: heap total: 4, heap peak: 4, stack peak: 2976
+         total calls   total memory   failed calls
+ malloc|          1              4              0
+realloc|          0              0              0  (nomove:0, dec:0, free:0)
+ calloc|          0              0              0
+   free|          2              0
+Histogram for block sizes:
+    0-15              1 100% ==================================================
+\end{verbatim}
+}
+}
+
+\frame[containsverbatim]{ \frametitle{Memusage}
+{\small\begin{verbatim}
+sbrandt@localhost$ memusagestat -o mem.png mem.out -x 500 -y 300
+\end{verbatim}
+}
+\begin{figure}
+\includegraphics[width=9cm]{pics/mem}
+\end{figure}
+}
+
+\subsection{Profile-Guided Optimization}
+\frame{\frametitle{}\begin{centering}\LARGE\insertsubsectionhead\\\end{centering}}
+
+\frame[containsverbatim]{ \frametitle{Profile Guided Optimization}
+\begin{itemize}
+\item Run your code and see how fast it is
+\item Compile with -fprofile-generate
+\item Run your code (it will be slightly slower)
+\item Compile again with -fprofile-use
+\item Run your code again, and see how much faster it is
+\item Works well if you have lots of if's
+\end{itemize}
+}
+
+\frame[containsverbatim]{ \frametitle{Profile Guided Optimization}
+{\small\begin{verbatim}
+#include <stdlib.h>
+void bubble(int *a,int n) {
+    for(int j=0;j<n-1;j++)
+        for(int i=0;i<n-1;i++)
+            if(a[i] > a[i+1]) {
+                int s = a[i];
+                a[i] = a[i+1];
+                a[i+1] = s;
+            }
+}
+int main() {
+    const int n = 60000;
+    int *a = new int[n];
+    for(int i=0;i<n;i++)
+        a[i] = rand();
+    bubble(a,n);
+    return 0;
+}
+\end{verbatim}
+}
+}
+
+\frame[containsverbatim]{ \frametitle{Profile Guided Optimization}
+\begin{itemize}
+\item Speedup is approximately 6\% for Bubble Sort on mike (6.44 to 6.08)
+\item Can be used to speed up Firefox and gcc
+\item Used extensively by the Java Virtual Machine
+\item With the Intel compilers there's -prof-gen and -prof-use
+\item Actually slows down!
+\end{itemize}
+}
+
+%\subsection{oprofile}
+%\frame{\frametitle{}\begin{centering}\LARGE\insertsubsectionhead\\\end{centering}}
+
+
+%\frame[containsverbatim]{ \frametitle{oprofile}
+%    \begin{itemize}
+%    \item PAPI is not available on all machines (i.e. not on LONI)
+%    \item Hardware counters available through OProfile
+%    \item OProfile requires root
+%    \item OProfile can be used on sudo is available on LONI
+%    \end{itemize}
+%}
+
+%\frame[containsverbatim]{ \frametitle{oprofile}
+%    You can find out what your privileges are using
+%    sudo -l.
+%    \begin{verbatim}
+%User sbrandt may run the following commands on this host:
+%    (gold) NOPASSWD: /usr/local/packages/gold/bin/glsuser,
+%    /usr/local/packages/gold/bin/glsproject,
+%    /usr/local/packages/gold/bin/glsalloc,
+%    /usr/local/packages/gold/bin/bal.pl,
+%    /usr/local/packages/gold/bin/gbalance
+%    (root) NOPASSWD: /usr/local/bin/opsafe
+%    \end{verbatim}
+%}
+
+
+%\frame[containsverbatim]{ \frametitle{oprofile}
+%\begin{itemize}
+%\item If you want to profile applications on Queen Bee, you can't run
+%the opcontrol command directly. Instead, you can run a script called
+%opsafe that limits what the command can do.
+
+%\item If you are running in the batch queue, you will need to put
+%``{\tt pbsdsh -u}'' before each opsafe command. This will make sure that
+%oprofile is running on all the nodes you are using in your computation.
+
+%\item Because the opsafe command runs as root, you'll need to precede it
+%with ``{\tt sudo -u root}''.
+
+%\item In the next slide, ``{\tt opsafe}'' should be taken as an
+%abbreviation for ``{\tt pbsdsh -u sudo /usr/local/bin/opsafe}''.
+%\end{itemize}
+%}
+%\frame[containsverbatim]{ \frametitle{oprofile}
+%\begin{itemize}
+%\item {\tt opsafe --shutdown}
+%Makes sure oprofile is turned off before we configure and start it.
+%\item {\tt opsafe --setup --no-vmlinux --event=CPU\_CLK\_UNHALTED:400000}
+%\item {\tt \verb=opsafe --start=}
+%\item {\it ./run\_your\_code}
+%\item {\tt \verb=opsafe --dump=}
+%\item {\tt opannotate --source} {\it full\_path/run\_your\_code} {\tt --output-dir=}{\it full\_path}{\tt\verb=/anno$HOSTNAME=}
+%   This command actually needs to be run by ``{\tt pbsdsh}'' from inside a script. The script allows each the \verb=$HOSTNAME= variable to expand differently.
+%\end{itemize}
+%}
+
+\subsection{HPC Toolkit}
+\frame{\frametitle{}\begin{centering}\LARGE\insertsubsectionhead\\\end{centering}}
+
+\frame[containsverbatim]{ \frametitle{HPC Toolkit}
+To demonstrate we will use the HPC Toolkit on Arete (arete.cct.lsu.edu).
+We'll run Cactus for 200 steps, then run the viewer.
+\begin{itemize}
+\item Compile with debug mode:
+{\tiny\verb=sim build --debug --thornlist ../WaveDemo.th --optionlist local.cfg=}
+\item Run with hpcrun:
+{\tiny\verb=mpiexec -np 2 hpcrun -e PAPI_TOT_CYC:1000000 -e PAPI_L2_DCM:100000 \=
+\verb=-e PAPI_FP_OPS:500000 -e PAPI_TLB_DM:100000 ./exe/cactus_sim-debug ./pars/WaveDemo.par=}
+\item Postprocess with hpcstruct:
+{\tiny \verb=hpcstruct ./exe/cactus_sim-debug=}
+\item Postprocess with hpcprof:
+{\tiny \verb=hpcprof -S ./cactus_sim-debug.hpcstruct -I ./ hpctoolkit-cactus_sim-debug-measurements/=}
+\item View:
+\tiny{\verb=hpcviewer hpctoolkit-cactus_sim-debug-database/=}
+\end{itemize}
+}
+
+\frame[containsverbatim]{ \frametitle{HPC Toolkit}
+    \begin{center}
+    \includegraphics[width=9cm]{pics/hpcviewer}\mbox{\hspace{0.5em}}
+    \end{center}
+}
+
+\subsection{Perfexpert}
+\frame{\frametitle{}\begin{centering}\LARGE\insertsubsectionhead\\\end{centering}}
+
+\frame[containsverbatim]{ \frametitle{perfexpert}
+This is a tool from TACC that attempts to turn the output of HPC Toolkit
+into something easier to understand.
+\begin{itemize}
+\item Home Page: http://www.tacc.utexas.edu/perfexpert/
+\item Automatically runs a sequence of experiments
+\item Shows information about the most significant sections of code
+      and rate loops on how well they perform.
+\item AutoSCOPE attempts to give concrete advice on how to improve
+      problem areas of code.
+\end{itemize}
+}
+
+\frame[containsverbatim]{ \frametitle{perfexpert}
+Running Perfexpert has fewer steps than running HPC Toolkit. First
+you run experiments, then you run the filter on the output (experiment.xml).
+When you run the regular perfexpert tool, you specify what level of
+analysis you need. Below we choose to ignore diagnostics for loops that
+take less than 10\% of the run time.
+\begin{itemize}
+\item {\small\verb=[sbrandt@master Cactus]$ perfexpert_run_exp= 
+  \verb=./exe/cactus_sim ./pars/WaveDemo.par=}
+\item {\small\verb=[sbrandt@master Cactus]$ perfexpert 0.1= \verb=./experiment.xml > perfout.txt=}
+\end{itemize}
+}
+
+\frame[containsverbatim]{ \frametitle{perfexpert}
+{\tiny
+\begin{verbatim}
+Total running time for "./experiment.xml" is 25.236 sec
+
+Function WaveToyC_Evolution() at WaveToy.c:36 (41.7% of the total runtime)
+===============================================================================
+ratio to total instrns       %  0.........25...........50.........75........100
+   - floating point      :   22 **********
+   - data accesses       :   24 ***********
+* GFLOPS (% max)         :   10 *****
+-------------------------------------------------------------------------------
+performance assessment     LCPI good......okay......fair......poor......bad....
+* overall                :  0.6 >>>>>>>>>>>
+upper bound estimates
+* data accesses          :  1.1 >>>>>>>>>>>>>>>>>>>>>>>
+   - L1d hits            :  0.9 >>>>>>>>>>>>>>>>>>
+   - L2d hits            :  0.1 >>
+   - L2d misses          :  0.2 >>>
+* instruction accesses   :  0.6 >>>>>>>>>>>
+   - L1i hits            :  0.6 >>>>>>>>>>>
+   - L2i hits            :  0.0 >
+   - L2i misses          :  0.0 >
+* data TLB               :  0.0 >
+* instruction TLB        :  0.0 >
+* branch instructions    :  0.0 >
+   - correctly predicted :  0.0 >
+   - mispredicted        :  0.0 >
+* floating-point instr   :  0.6 >>>>>>>>>>>>>
+   - fast FP instr       :  0.6 >>>>>>>>>>>>>
+   - slow FP instr       :  0.0 >
+
+Loop in function WaveToyC_Evolution() at WaveToy.c:73 (41.4% of the total runtime)
+===============================================================================
+\end{verbatim}
+}
+}
+
+\frame[containsverbatim]{ \frametitle{perfexpert}
+    \begin{center}
+    \includegraphics[width=10cm]{pics/AutoSCOPE}\mbox{\hspace{0.5em}}
+    \end{center}
+}
+
+\frame[containsverbatim]{ \frametitle{perfexpert}
+    \begin{center}
+    \includegraphics[width=10cm]{pics/AutoSCOPE2}\mbox{\hspace{0.5em}}
+    \end{center}
+}
+\subsection{Homework}
+
+\frame[containsverbatim]{
+    \frametitle{Homework}
+    The following questions are based on the wave.cpp and qsort.c programs
+    in the public SVN repository.
+    \begin{enumerate}
+    \item Debug wave.cpp using Valgrind. What problems did you find?
+    \item Use profile guided optimization to speed up qsort.c. What speedup do you get?
+    \end{enumerate}
+}
+
+\end{document}

@@ -1,0 +1,11 @@
+1. Of the applications discussed what are the most common reasons for "distributing"? How they were distributed? Name some tools
+2. Discuss Cloud Models. Is Amazon Web Services an example of of IaaS, PaaS or SaaS?
+3. Estimate to within an order of magnitude the number of jobs that are executed in theWorldwide LHC Computing Grid (WLCG) per day. Estimate to within an order of magnitude the number of bytes of data generated (overall) by the WLCG. Take the cost of LHC Experiment to be \$1B a year. Therefore what is the cost of generating a byte of data from the LHC experiment?
+4. What are the primary advantages of using SAGA?
+5. Provide one difference between predominantly HTC and HPC Grids. Provide a “real production” example of a HPC and HTC Grid.
+6. Describe at least one commonly used pattern discussed in class? Why was this suitable for distribution?
+7. What are the primary advantages of distributed applications? What are the primary challenges?
+8. Discuss some differences between TeraGrid and Open Science Grid?
+9. What are some of the reasons for the interest/adoption of Cloud Computing?
+10. Describe the MapReduce algorithm
+11. What is a Pilot-Job?

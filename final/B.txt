@@ -1,0 +1,6 @@
+1. Explain weak scaling and strong scaling, what's their relation to the modalities of parallel computing
+2. Explain Amdahl's Law with and without taking into account overheads
+3. Explain the threaded execution model. What is a thread? What are the pitfalls? How do you mitigate those?
+4. Explain the OpenMP programming model. What are the components of OpenMP?
+5. Explain the Communicating Sequential Processes execution model.
+6. What is MPI? What types of communication can be used with MPI?

@@ -1,0 +1,79 @@
+\include{global/preamble}
+
+%\usecolortheme[RGB={200,200,200}]{structure}
+
+\subtitle[Module D]{{\large Module D: Simulations and Application Frameworks}\\*[0.3em]Homework 1: Get started with the Einstein Toolkit}
+\author[Peter Diener]{Dr Peter Diener}
+\date{November 15, 2013}
+\usecolortheme[RGB={45,160,140}]{structure}
+
+\begin{document}
+
+\frame{\titlepage}
+
+\section{Homework}
+\frame{\frametitle{}\begin{centering}\LARGE\insertsectionhead\\\end{centering}}
+
+\frame[containsverbatim]{ \frametitle{Homework}
+  Your homework for this week will be to checkout (using GetComponents) the 
+  Einstein Toolkit, compile and run a simulation on Super Mike II (using
+  Simfactory).
+  You should (mostly) follow the tutorial at:
+  {\small \tt{https://docs.einsteintoolkit.org/et-docs/Tutorial\_for\_New\_Users}}
+  \vspace{0.5em}
+
+  As this tutorial was written for the machine Queen Bee, there is a few 
+  differences in setting up Simfactory so the tutorial has to be modified
+  as follows:
+  \vspace{0.5em}
+
+  Log into {\tt mike.hpc.lsu.edu} and start following the tutorial in
+  your home directory with the following modifications.
+  \begin{itemize}
+    \item The {\tt git}, {\tt python} and {\tt svn} clients are already 
+	  available so skip the commands:\\
+	  {\tt soft add +python-2.6.4-gcc-4.3.2} \\
+          {\tt soft add +git} \\
+	  {\tt soft add +subversion-1.8.3-gcc-4.3.2}
+  \end{itemize}
+}
+
+\frame[containsverbatim]{ \frametitle{Homework}
+  \begin{itemize}
+    \item When you get to the section ``Configure the Simulation Factory'':
+	  replace the first command {\tt mkdir scratch/simulations} with \\
+	  {\tt mkdir /work/<username>/simulations}. Here, replace ``username''
+	  with your username on Mike.
+    \item Execute the next two commands. 
+    \item When asked to edit the file 
+	  {\tt simfactory/etc/defs.local.ini}: change ``YOUR\_LOGIN'', 
+	  ``YOUR@EMAIL.ADDRESS'' and ``YOUR\_THORNLIST'' as described but
+	  skip changing ``YOUR\_ALLOCATION'' and instead add a mike specific
+          section at the end of the file containing:
+	  \begin{verbatim}
+[mike]
+allocation      = hpc_startup_<username>
+sourcebasedir   = /home/<username>
+	  \end{verbatim}
+  \end{itemize}
+} 
+
+\frame[containsverbatim]{ \frametitle{Homework}
+  \begin{itemize}
+    \item Continue with the tutorial (i.e.\ compile and running) and wait
+          until the run has finished before continuing.
+    \item When you get to the ``Look at Results'' part of the tutorial:
+      Log into Mike (of course) instead of Queen Bee (don't forget forwarding of X). \\
+      To change to the output directory do:\\
+	{\footnotesize {\tt cd /work/<username>/simulations/static\_tov/output-0000/static\_tov}}
+    \item Do not continue with the additional examples.
+  \end{itemize}
+  Your homework will consist of the standard output from the
+  simulation as well as your versions of the gnuplot plots. \\
+  Commit the standard output file located in\\
+   {\footnotesize {\tt /work/<username>/simulations/static\_tov/output-0000/static\_tov.out}}\\
+  and postscript or pdf files with the plots to {\tt coursework/D2/}
+  in your personal subversion repository for CSC7700. \\
+ Due date: November 22, 2013.
+}
+\end{document}

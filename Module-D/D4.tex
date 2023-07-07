@@ -1,0 +1,491 @@
+\include{global/preamble}
+
+%\usecolortheme[RGB={200,200,200}]{structure}
+
+\subtitle[Module D]{{\large Module D: Simulations and Application Frameworks}\\*[0.3em]Lecture 4: Getting Science Out of Computing}
+\author[Peter Diener]{Dr Peter Diener}
+\date{November 22, 2013}
+\usecolortheme[RGB={75,132,186}]{structure}
+\definecolor{cactusgreen}{RGB}{132,186,75}
+
+\begin{document}
+
+\frame{\titlepage}
+
+\section*{Outline}
+\frame{\tableofcontents}
+
+\section{Goals}
+\frame{\frametitle{}\begin{centering}\LARGE\insertsectionhead\\\end{centering}}
+
+\frame[containsverbatim]{ \frametitle{Goals}
+  \begin{itemize}
+    \item Lecture 1 introduced:
+      \begin{itemize}
+        \item The concept of a simulation and it's ingredients.
+        \item Supercomputers from the application scientist's point of view.
+      \end{itemize}
+    \item Lecture 2 introduced:
+      \begin{itemize}
+        \item Parallelization: data structures, load balancing, domain
+              decomposition.
+        \item Software Engineering: multi-physics simulations, large projects,
+              distributed code development.
+      \end{itemize}
+    \item Lecture 3 introduced:
+      \begin{itemize}
+        \item The component model as software architecture for real-world
+              simulation codes.
+        \item The Cactus Software Framework as a specific example.
+      \end{itemize}
+    \item In this lecture we will discuss:
+      \begin{itemize}
+        \item Additional framework concepts.
+        \item Scientific programming.
+      \end{itemize}
+  \end{itemize}
+}
+
+\section{Summary}
+\frame{\frametitle{}\begin{centering}\LARGE\insertsectionhead\\\end{centering}}
+
+\frame[containsverbatim]{ \frametitle{Summary}
+  \begin{itemize}
+    \item To go from physics to a simulation, one usually
+      \begin{enumerate}
+        \item Finds a mathematical model (e.g.\ PDEs) expressing the physics.
+        \item Discretises the model (e.g.\ PDEs).
+        \item Implements the discretized equations on a supercomputer
+      \end{enumerate}
+    \item Many simulation codes have a similar structure.
+    \item Many supercomputers have a similar architecture.
+  \end{itemize}
+}
+
+\frame[containsverbatim]{ \frametitle{Summary}
+  \begin{itemize}
+    \item Parallel algorithms are necessary due to size of the problems (memory)
+          and computational cost (CPU time).
+    \item MPI is the tool of choice. Requires domain decomposition, advanced
+          data structures and load balancing algorithms.
+    \item A component model is necessary to develop complicated multi-physics
+          codes using geographically distributed code developers.
+    \item A \emph{framework} provides the glue between components.
+    \item We introduced the Einstein Toolkit as a real world example.
+  \end{itemize}
+}
+
+\frame[containsverbatim]{ \frametitle{Summary}
+  \begin{itemize}
+    \item We introduced the Cactus framework.
+    \item Applications consist of many components (\emph{thorns}) glued 
+          together by the framework (\emph{flesh}).
+    \item Cactus provides the main program while components are libraries.
+    \item The end user can mix and match the thorns necessary for a specific
+          problem and control which thorns are active at runtime.
+    \item Thorns have implementation (regular code) and interface (ccl) files.
+    \item Thorns ``talk'' to each other only through well-defined interfaces
+          and an API provided by the flesh.
+    \item The MPI parallellisation issues are (mostly) hidden from the
+          application programmer (\texttt{SYNC} statements in schedule
+          determines ghost zone updates).
+  \end{itemize}
+}
+
+\section{Additional Framework Concepts}
+\frame{\frametitle{}\begin{centering}\LARGE\insertsectionhead\\\end{centering}}
+
+\frame[containsverbatim]{ \frametitle{Cactus: Driver Thorn}
+  \begin{itemize}
+    \item A \emph{driver} is a special thorn in Cactus that implements
+          parallelism and memory management.
+    \item The driver implements the ``grid function'' data type (as well as
+          ``grid arrays'').
+    \item This \emph{externalizes parallelism} so that other thorns don't have
+          to implement parallel algorithms
+    \item However, this places certain restrictions onto other thorns.
+    \item There must be exactly one driver active (standard Cactus driver
+          is PUGH).
+    \item The driver can provide advanced discretisation methods, such as AMR
+          or multi-block (e.g.\ the \emph{Carpet} driver).
+    \item The driver can be based on an existing parallel library (e.g.\ Chombo
+          or Samrai).
+    \item The driver (or closely related thorn) also provides I/O.
+  \end{itemize}
+}
+
+\section{Application efficiency}
+\frame{\frametitle{}\begin{centering}\LARGE\insertsectionhead\\\end{centering}}
+
+\frame[containsverbatim]{ \frametitle{Data Access}
+  \begin{itemize}
+    \item Simulations handle large data sets (previous example: 1 billion
+          elements).
+    \item Cannot easily copy data:
+      \begin{itemize}
+        \item Not enough memory.
+        \item It takes too much time.
+      \end{itemize}
+    \item If possible, each process must compute with the data it owns
+          (``bring computation to data'').
+    \item In Cactus, work routines are called on each process with access to
+          the data owned by the process.
+  \end{itemize}
+}
+
+\frame[containsverbatim]{ \frametitle{Data Sharing}
+  \begin{itemize}
+    \item Different components may need to access the same data.
+      \begin{itemize}
+        \item Example: A spacetime evolution thorn needs access to the
+              stress energy tensor and a hydrodynamics evolution thorn
+              needs access to the spacetime metric.
+      \end{itemize}
+    \item If components are very independent, data need to be copied.
+    \item If data cannot be copied, the components must interact in
+          some (non-trivial) way.
+    \item In Cactus this is done by inheritance: A thorn can have direct
+          access to another thorn's data.
+  \end{itemize}
+}
+
+\frame[containsverbatim]{ \frametitle{Component Coupling}
+  \begin{itemize}
+    \item How closely are components coupled in a framework?
+      \begin{description}
+        \item[No Coupling:] Independently executing programs. Data 
+                           ``sharing'' requires writing/copying/reading files.
+        \item[Loose Coupling:] Independent data management and parallelism
+                               in each component. Data sharing requires
+                               memory transfers.
+        \item[Tight Coupling:] Data are managed outside of components (or by
+                               a special component). Data sharing is efficient
+                               (components share access to the same memory), 
+                               but components need to rely on an external
+                               data manager.
+      \end{description}
+  \end{itemize}
+}
+
+\frame[containsverbatim]{ \frametitle{Component Coupling}
+  \begin{center}
+    \includegraphics[width=11cm]{component_interoperability}
+  \end{center}
+}
+
+\frame[containsverbatim]{ \frametitle{Component Safety}
+  \begin{itemize}
+    \item Efficient data sharing between components requires running in the
+          same address space.
+    \item This means that components can (accidentally?) modify each other's
+          data. E.g.\ errors (such as array index out of bounds) can propagate
+          between components.
+    \item Compile time access control and coding standards can provide some
+          safety.
+  \end{itemize}
+}
+
+\frame[containsverbatim]{ \frametitle{Additional Framework Concepts Summary}
+  \begin{itemize}
+    \item Many simulation frameworks with many different designs exist.
+    \item Fundamental design question is: How tight are components coupled?
+    \item Tight coupling requires shared data management between components.
+    \item Trade-off between independence/ease-of-programming/safety and
+          efficiency.
+  \end{itemize}
+}
+
+\section{Scientific Programming}
+\frame{\frametitle{}\begin{centering}\LARGE\insertsectionhead\\\end{centering}}
+
+\frame[containsverbatim]{ \frametitle{Shared Code Development}
+  \begin{itemize}
+    \item Developing a large code as a group (or community) is different
+          from small-scale programming.
+      \begin{itemize}
+        \item There is old code ($>10$ years old) that ``belongs to nobody''.
+        \item People use ``your'' code without understanding it.
+        \item People make changes to ``your'' code without understanding it.
+      \end{itemize}
+    \item Best not to have ``your'' or ``my'' code. Instead share 
+          responsibility.
+    \item Program defensively, so that wrong usage is (always) detected.
+    \item There need to be a testing mechanism so that bad changes can be
+          detected quickly.
+  \end{itemize}
+}
+
+\frame[containsverbatim]{ \frametitle{Test Cases}
+  \begin{itemize}
+    \item Code can be $>10$ years old and still very good.
+      \begin{itemize}
+        \item Cannot rewrite old code every year (and introduce new errors
+              every year).
+      \end{itemize}
+    \item But need to make sure old code is actually still working, despite
+          the many other changes to the framework and other components that it
+          interacts with.
+    \item A \emph{test case} stores program input and expected output so that
+          any change in behavior can be detected.
+   \item Test cases can also be used to test portability. Should get the same
+         result on different architectures to within roundoff error.
+  \end{itemize}
+}
+
+\frame[containsverbatim]{ \frametitle{Recovering From Errors}
+  \begin{itemize}
+    \item Mistakes happen (bugs) and it should be possible to undo bad changes
+          to the code.
+    \item It is important, therefore, to keep the complete history of all
+          changes to the code in order to be able to undo changes when
+          necessary.
+    \item Need to use source code management tools such as subversion, darcs,
+          git, mercurial\ldots This not only keeps track of the changes to
+          the code but also who made them.
+  \end{itemize}
+}
+
+\frame[containsverbatim]{ \frametitle{Working Together}
+  \begin{itemize}
+    \item A source code management system also defines a \emph{single
+          standard version} of the components on which everybody is working.
+    \item It would be too confusing to send source code around by email or
+          look into other directories.
+    \item Source code management systems also allows for temporary branches
+          for heavy development when adding new features without disturbing
+          people doing production runs.
+    \item Source code management systems are indispensable for scientific
+          code development.
+    \item Tutorials for source code management systems are available online.
+  \end{itemize}
+}
+
+\frame[containsverbatim]{ \frametitle{Policies}
+  \begin{itemize}
+    \item Working in a group on a code base requires some policies regarding:
+      \begin{itemize}
+        \item Coding style (routine names, indentation, commit messages).
+        \item Access rights (using, modifying, adding, committing).
+        \item Testing standards before committing changes.
+        \item Peer review before/after making changes.
+      \end{itemize}
+    \item It is necessary to know what is acceptable behavior.
+  \end{itemize}
+}
+
+\frame[containsverbatim]{ \frametitle{Component Life Cycle}
+  \begin{itemize}
+    \item Idea, experimental implementation.
+    \item Prototype, useful for a single paper.
+    \item Production code, more features added, most bugs removed, useful for
+          a series of papers.
+    \item Mature code, very useful, few changes.
+    \item Outdated, used mostly for historic investigations but still somewhat
+          useful.
+  \end{itemize}
+}
+
+\frame[containsverbatim]{ \frametitle{Portability}
+  \begin{itemize}
+    \item Machines become old, outdated and unreliable after a few years, while
+          new machines become available.
+    \item HPC systems frequently (sometimes once a week!) require maintenance
+          or a unavailable for longer periods of time for an upgrade (maybe
+          once a year!).
+    \item Installed software (compilers) may have bugs that makes a machine
+          unusable until fixed.
+    \item Therefore, scientific codes need to be portable so that one can then
+          quickly use other machines.
+  \end{itemize}
+}
+
+\frame[containsverbatim]{ \frametitle{New Hardware Architectures}
+  \begin{minipage}[t]{4cm}
+    \vspace{0pt}
+    \includegraphics[width=3.8cm]{cpu_frequency}\\
+    \includegraphics[width=3.8cm]{power_consumption}
+  \end{minipage}
+  \begin{minipage}[t]{7.5cm}
+    \vspace{0pt}
+    \includegraphics[width=7.3cm]{Projected_Performance_Development}\\
+  \end{minipage}
+}
+
+\frame[containsverbatim]{ \frametitle{New Hardware Architectures}
+  \begin{itemize}
+    \item Software stays around much longer than hardware.
+      \begin{itemize}
+         \item Software: $>15$ years (Cactus).
+         \item Hardware: 3 years on average (5 years at most).
+      \end{itemize}
+    \item Software design must not only be portable but also architecture
+          independent.
+    \item Software has to be adaptable when architecture changes dramatically.
+  \end{itemize}
+}
+
+\frame[containsverbatim]{ \frametitle{Multi Core CPUs}
+  \begin{itemize}
+    \item The clock speed has not increased since 2005 whereas the transistor
+          density has continued increasing.
+    \item End result: more and more cores on a chip resulting in nodes
+          with multiple cores able to access the same shared memory.
+    \item Could in principle continue to use pure MPI parallelization.
+    \item However, remember memory overhead due to ghost zones and additional
+          computational overhead from domain decomposition.
+    \item Scaling can suffer at very large core counts.
+  \end{itemize}
+}
+
+\frame[containsverbatim]{ \frametitle{OpenMP}
+  \begin{itemize}
+    \item Better scaling may be obtained by using OpenMP (Open
+          Multi-Processing) parallelization within a shared memory node and
+          MPI parallelization between nodes.
+    \item OpenMP is a shared memory parallelization paradigm based on
+          lightweight threads and workload distribution between threads.
+    \item Parallisation is implemented using compiler directives to tell
+          the compiler how to distribute the work in a loop among threads. 
+    \item Parallelization can be done incrementally (i.e.\ loop by loop).
+    \item OpenMP directives ignored when compiling with a sequential compiler.
+    \item Works with F77, F90, C and C++.
+  \end{itemize}
+}
+
+\frame[containsverbatim]{ \frametitle{OpenMP examples}
+C:\\
+{\footnotesize
+\begin{verbatim}
+#pragma omp parallel for private(i,w) shared(N,a,b) reduction(+:sum)
+for(i = 0; i < N; i++)
+{
+  b[i] = 2*a[i]+3;
+  w = i*i;
+  sum = sum + w*a[i];
+}
+\end{verbatim}
+}
+
+Fortran:\\
+{\footnotesize
+\begin{verbatim}
+!$omp parallel do private(i,w) shared(N,a,b) reduction(+:sum)
+do i = 1, N
+  b(i) = 2*a(i)+3
+  w = (i-1)*(i-1)
+  sum = sum + w*a(i)
+end do
+!$omp end parallel do
+\end{verbatim}
+}
+}
+ 
+\frame[containsverbatim]{ \frametitle{Accelerator Computing}
+  \begin{minipage}[t]{6.5cm}
+    \vspace{-0.5em}
+    \begin{itemize}
+      \item Started in 2001 with a Sony/Toshiba/IBM collaboration for the
+            \emph{Cell} processor.
+      \item It has one ``real'' core (Power Processor Element) and 8 
+            ``additional'' cores (Synergistic Processing Element) on a single
+            chip that are linked together by a high speed bus
+            (Element Interconnect Bus).
+      \item It is used in Sony's Playstation, Roadrunner at Los Alamos
+            National Laboratory (\#19 on the top 500 in 2012) and other places.
+      \item Newest player: Intel Xeon Phi used in TACC's Stampede.
+    \end{itemize}
+  \end{minipage}
+  \begin{minipage}[t]{5cm}
+    \vspace{0pt}
+    \includegraphics[width=4.8cm]{cell-processor}
+  \end{minipage}
+}
+ 
+\frame[containsverbatim]{ \frametitle{GPU Computing}
+  \begin{minipage}[t]{6.5cm}
+    \vspace{0pt}
+    \begin{itemize}
+      \item Graphics cards with a Graphic Processing Unit (GPU) have a similar
+            architecture with many cores.
+      \item In a GPU each core has to perform the same operation (Single
+            Instruction Multiple Data) i.e. the cores together work like a
+            vector unit.
+      \item The GPU cannot access the main memory of the CPU.
+      \item Three out of the top 10 machines on the current top 500 contains
+            a significant portion of GPUs.
+    \end{itemize}
+  \end{minipage}
+  \begin{minipage}[t]{5cm}
+    \vspace{0pt}
+    \includegraphics[width=4.8cm]{gpu-schematic}
+  \end{minipage}
+}
+ 
+\frame[containsverbatim]{ \frametitle{GPU Computing Challenges}
+  \begin{itemize}
+    \item Each core is small and slow. A GPU needs to use many cores to be as fast
+          as a regular CPU.
+      \begin{itemize}
+        \item Slower clock speed.
+        \item Less memory per core.
+      \end{itemize}
+    \item Need to use even more cores to get good performance.
+    \item But, if this is possible, then total speed is much larger than that
+          of regular CPUs (of same total cost) and uses a lot less power.
+    \item Memory management is a lot more complicated.
+      \begin{itemize}
+        \item Data has to be copied from CPU main memory to GPU memory and
+              back (slow).
+        \item Algorithms have to be modified to do as many calculations
+              as possible on data on GPU before copying back and forth.
+      \end{itemize}
+  \end{itemize}
+}
+ 
+\frame[containsverbatim]{ \frametitle{Framework Architecture Challenges}
+  \begin{itemize}
+    \item Don't want to redesign framework and rewrite code for new 
+          architectures.
+    \item The framework should isolate the programmer from architectural
+          changes as much as possible.
+    \item MPI clusters have been around for about 20 years.
+    \item Now something new is coming (has already arrived).
+      \begin{itemize}
+        \item Multicore CPUs (requires use of OpenMP, pthreads or similar).
+        \item Cell and GPU accelerators (requires use of CUDA, OpenCL or OpenACC).
+	\item Intel Xeon Phi accelerators currently only works with the Intel
+	      compilers.
+      \end{itemize}
+  \end{itemize}
+}
+ 
+\frame[containsverbatim]{ \frametitle{Cactus Approach to Architecture
+                                      Independence}
+  \begin{itemize}
+    \item Separate physics code from computer science code.
+    \item Each thorn ``sees'' only the small part of the overall problem that
+          is relevant for its function (information hiding).
+    \item Ideally each physics thorn would act on a single grid point at
+          a time. However, that would have too much overhead.
+    \item This externalizes parallelism, load balancing, data distribution and
+          data sharing (\emph{largest Cactus success}).
+    \item This also significantly complicates programming (\emph{largest Cactus
+          problem}).
+    \item Multicore and accelerator programming poses a distinct challenge for
+          Cactus.
+    \item Currently being addressed with macros, templates and automatic code
+          generation (LoopControl, CaKernel and Kranc). 
+  \end{itemize}
+}
+ 
+\frame[containsverbatim]{ \frametitle{Scientific Programming Practices Summary}
+  \begin{itemize}
+    \item Use a (or several) source code management system for code development.
+    \item Keep track of software versions for each simulation (Formaline).
+    \item Have test cases for each component to ensure correctness.
+    \item Need portability and architecture independence or at least enough
+          flexibility to make programs future-proof.
+  \end{itemize}
+}
+
+\end{document}

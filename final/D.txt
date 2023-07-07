@@ -1,0 +1,10 @@
+1. Explain in basic terms what a scientific simulation is and what it's main ingredients are.
+2. What is discretisation and how is it used in scientific computing?
+3. Explain what MPI is and how it is used for parallel programming for a cluster architecture.
+4. Explain the role of ghostzones in a domain decomposition scheme.
+5. Describe the roles of the flesh and the thorns in Cactus.
+6. Describe the roles of the interface.ccl, schedule.ccl and param.ccl files in Cactus.
+7. Describe the role of the driver thorn in Cactus.
+8. Contrast OpenMP programming and MPI programming.
+9. Describe the data managenment and transfer mechanisms in frameworks with 1) minimally coupled, 2) loosely coupled and 3) tightly coupled components. What category does Cactus belong to?
+10. Describe the main tools needed for collaborative development of a large application in a framework.
